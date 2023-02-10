@@ -9,3 +9,7 @@ test:
 .PHONY: dep
 make dep:
 	go mod download
+
+.PHONY: release
+release:
+	goreleaser release --clean
