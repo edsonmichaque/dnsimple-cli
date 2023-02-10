@@ -125,7 +125,7 @@ dockers:
       - "edsonmichaque/dnsimple-cli:v{{ .Major }}-arm64"
       - "edsonmichaque/dnsimple-cli:v{{ .Major }}.{{ .Minor }}-arm64"
 
-    skip_push: true
+    skip_push: false
     dockerfile: Dockerfile
     build_flag_templates:
       - "--pull"
