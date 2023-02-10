@@ -1,0 +1,184 @@
+project_name: dnsimple-cli
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: nix
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - freebsd
+      - openbsd
+      - netbsd
+    goarch:
+      - 386
+      - amd64
+      - arm
+      - arm64
+    main: ./cmd/dnsimple/main.go
+    binary: dnsimple
+    ldflags:
+      - "-s -w -X github.com/edsonmichaque/dnsimple-cli/internal/build.Version={{.Version}}"
+      - "-s -w -X github.com/edsonmichaque/dnsimple-cli/internal/build.Date={{.Date}}"
+
+  - id: darwin
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    main: ./cmd/dnsimple/main.go
+    binary: dnsimple
+    ldflags:
+      - "-s -w -X github.com/edsonmichaque/dnsimple-cli/internal/build.Version={{.Version}}"
+      - "-s -w -X github.com/edsonmichaque/dnsimple-cli/internal/build.Date={{.Date}}"
+
+  - id: windows
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    main: ./cmd/dnsimple/main.go
+    binary: bin/dnsimple
+    ldflags:
+      - "-s -w -X github.com/edsonmichaque/dnsimple-cli/internal/build.Version={{.Version}}"
+      - "-s -w -X github.com/edsonmichaque/dnsimple-cli/internal/build.Date={{.Date}}"
+
+archives:
+  - format: tar.gz
+    name_template: '{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    wrap_in_directory: true
+    strip_parent_binary_folder: true
+    files:
+      - LICENSE
+    format_overrides:
+    - goos: windows
+      format: zip
+    replacements:
+      darwin: macos
+
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+nfpms:
+  - license: Apache-2.0
+    maintainer: Edson Michaque
+    homepage: https://github.com/edsonmichaque/dnsimple-cli
+    bindir: /usr
+    dependencies:
+      - git
+    formats:
+      - deb
+      - rpm
+      - apk
+      - archlinux
+
+dockers:
+  -
+    id: amd64
+    use: buildx
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "edsonmichaque/dnsimple-cli:latest-amd64"
+      - "edsonmichaque/dnsimple-cli:{{ .Tag }}-amd64"
+      - "edsonmichaque/dnsimple-cli:v{{ .Major }}-amd64"
+      - "edsonmichaque/dnsimple-cli:v{{ .Major }}.{{ .Minor }}-amd64"
+
+    skip_push: true
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/amd64"
+    push_flags:
+      - --tls-verify=false
+  -
+    id: arm64
+    use: buildx
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "edsonmichaque/dnsimple-cli:latest-arm64"
+      - "edsonmichaque/dnsimple-cli:{{ .Tag }}-arm64"
+      - "edsonmichaque/dnsimple-cli:v{{ .Major }}-arm64"
+      - "edsonmichaque/dnsimple-cli:v{{ .Major }}.{{ .Minor }}-arm64"
+
+    skip_push: true
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/arm64"
+    push_flags:
+      - --tls-verify=false
+
+docker_manifests:
+  - name_template: edsonmichaque/dnsimple-cli:latest
+    image_templates:
+      - "edsonmichaque/dnsimple-cli:latest-amd64"
+      - "edsonmichaque/dnsimple-cli:latest-arm64"
+  - name_template: edsonmichaque/dnsimple-cli:{{ .Tag }}
+    image_templates:
+      - "edsonmichaque/dnsimple-cli:{{ .Tag }}-amd64"
+      - "edsonmichaque/dnsimple-cli:{{ .Tag }}-arm64"
+  - name_template: edsonmichaque/dnsimple-cli:{{ .Major }}
+    image_templates:
+      - "edsonmichaque/dnsimple-cli:{{ .Major }}-amd64"
+      - "edsonmichaque/dnsimple-cli:{{ .Major }}-arm64"
+  - name_template: edsonmichaque/dnsimple-cli:{{ .Major }}{{ .Minor }}
+    image_templates:
+      - "edsonmichaque/dnsimple-cli:{{ .Major }}{{ .Minor }}-amd64"
+      - "edsonmichaque/dnsimple-cli:{{ .Major }}{{ .Minor }}-arm64"
+
+snapcrafts:
+  -
+    id: dnsimple-cli
+
+    builds:
+      - dnsimple
+
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+    name: drumroll
+
+    publish: false
+    summary: Software to create fast and easy drum rolls.
+    description: This is the best drum roll application out there. Install it and awe!
+    channel_templates:
+      - edge
+      - beta
+      - candidate
+      - stable
+      - '{{ .Major }}.{{ .Minor }}/edge'
+      - '{{ .Major }}.{{ .Minor }}/beta'
+      - '{{ .Major }}.{{ .Minor }}/candidate'
+      - '{{ .Major }}.{{ .Minor }}/stable'
+    grade: stable
+    confinement: strict
+    license: Apache-2.0
+    base: core18
