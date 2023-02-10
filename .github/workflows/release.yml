@@ -31,7 +31,11 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
+          version: latest
+          args: release --clean
       - name: goreleaser-release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-        run: make release
