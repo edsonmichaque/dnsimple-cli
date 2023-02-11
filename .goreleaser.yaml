@@ -160,7 +160,6 @@ snapcrafts:
     summary:  A client for DNSimple
     description: A client for DNSimple
     grade: stable
-    confinement: classic
     publish: true
     license: Apache-2.0
     base: core18
