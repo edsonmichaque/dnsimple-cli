@@ -162,14 +162,5 @@ snapcrafts:
     grade: stable
     confinement: classic
     publish: true
-    channel_templates:
-      - edge
-      - beta
-      - candidate
-      - stable
-      - '{{ .Major }}.{{ .Minor }}/edge'
-      - '{{ .Major }}.{{ .Minor }}/beta'
-      - '{{ .Major }}.{{ .Minor }}/candidate'
-      - '{{ .Major }}.{{ .Minor }}/stable'
     license: Apache-2.0
     base: core18
