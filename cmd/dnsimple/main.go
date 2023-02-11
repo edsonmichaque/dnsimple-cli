@@ -16,8 +16,13 @@
 
 package main
 
-import "fmt"
+import (
+	"github.com/edsonmichaque/dnsimple-cli/internal/cmd"
+	"os"
+)
 
 func main() {
-	fmt.Println("Hello, world")
+	if err := cmd.NewCmdRoot(nil).Execute(); err != nil {
+		os.Exit(1)
+	}
 }
