@@ -161,21 +161,3 @@ snapcrafts:
     license: Apache-2.0
     base: core18
     confinement: strict
-
-brews:
-  -
-    name: myproject
-    tap:
-      owner: edsonmichaque
-
-      name: dnsimple-cli-tap
-      branch: main
-    commit_author:
-      name: Edson Michaque
-      email: edson@michaque.com
-
-    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
-    description: "DNSimple CLI"
-
-    license: "Apache-2.0"
-    skip_upload: false
