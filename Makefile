@@ -13,3 +13,12 @@ make dep:
 .PHONY: release
 release:
 	goreleaser release --clean
+
+
+.PHONY: install-addlicense
+install-addlicense:
+	go install github.com/google/addlicense@latest
+
+.PHONY: copyright
+copyright: install-addlicense
+	addlicense -c 'Edson Michaque' -y 2023 -l apache -s  -ignore .github/** -ignore *.yml -ignore *.yaml .
