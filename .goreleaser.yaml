@@ -163,3 +163,4 @@ snapcrafts:
     publish: true
     license: Apache-2.0
     base: core18
+    confinement: strict
