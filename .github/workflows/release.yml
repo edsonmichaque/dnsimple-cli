@@ -31,7 +31,9 @@ jobs:
           mkdir -p $HOME/.cache/snapcraft/download
           mkdir -p $HOME/.cache/snapcraft/stage-packages
       - name: snapcraft-login
-        run: snapcraft login --with <(echo "${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}")
+        run: snapcraft login
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
       - name: dockerhub-login
         uses: docker/login-action@v2
         with:
@@ -45,3 +47,4 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
