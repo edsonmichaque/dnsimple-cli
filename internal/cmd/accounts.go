@@ -7,10 +7,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdWhoami(opts *CmdOpt) *cobra.Command {
+func NewCmdAccounts(opts *CmdOpt) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "whoami",
-		Short: "Check identity",
+		Use:   "accounts",
+		Short: "Accounts",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			baseURL := viper.GetString("base-url")
 
@@ -27,7 +27,7 @@ func NewCmdWhoami(opts *CmdOpt) *cobra.Command {
 
 			client := opts.Client(baseURL, accessToken)
 
-			resp, err := client.Identity.Whoami(context.Background())
+			resp, err := client.Accounts.ListAccounts(context.Background(), nil)
 			if err != nil {
 				return err
 			}
@@ -36,8 +36,6 @@ func NewCmdWhoami(opts *CmdOpt) *cobra.Command {
 
 			return nil
 		},
-
-		GroupID: "identity",
 	}
 
 	return cmd
