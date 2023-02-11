@@ -113,7 +113,6 @@ dockers:
     image_templates:
       - "edsonmichaque/dnsimple-cli:latest-amd64"
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-amd64"
-      - "edsonmichaque/dnsimple-cli:{{ .Major }}-amd64"
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}-amd64"
 
     skip_push: false
@@ -135,7 +134,6 @@ dockers:
     image_templates:
       - "edsonmichaque/dnsimple-cli:latest-arm64"
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-arm64"
-      - "edsonmichaque/dnsimple-cli:{{ .Major }}-arm64"
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}-arm64"
 
     skip_push: false
@@ -159,10 +157,6 @@ docker_manifests:
     image_templates:
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-amd64"
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-arm64"
-  - name_template: edsonmichaque/dnsimple-cli:{{ .Major }}
-    image_templates:
-      - "edsonmichaque/dnsimple-cli:{{ .Major }}-amd64"
-      - "edsonmichaque/dnsimple-cli:{{ .Major }}-arm64"
   - name_template: edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}
     image_templates:
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}-amd64"
