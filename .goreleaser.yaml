@@ -15,9 +15,7 @@ builds:
       - openbsd
       - netbsd
     goarch:
-      - 386
       - amd64
-      - arm
       - arm64
     main: ./cmd/dnsimple/main.go
     binary: dnsimple
@@ -167,8 +165,6 @@ snapcrafts:
 brews:
   -
     name: myproject
-    goamd64: v3
-
     tap:
       owner: edsonmichaque
 
