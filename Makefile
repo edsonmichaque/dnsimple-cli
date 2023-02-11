@@ -21,4 +21,4 @@ install-addlicense:
 
 .PHONY: copyright
 copyright: install-addlicense
-	addlicense -c 'Edson Michaque' -y 2023 -l apache -s  -ignore .github/** -ignore *.yml -ignore *.yaml .
+	addlicense -c 'Edson Michaque' -y 2023 -l apache -s  -ignore .github/**/*  .
