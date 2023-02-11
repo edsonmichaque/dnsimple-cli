@@ -154,3 +154,22 @@ docker_manifests:
     image_templates:
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}-amd64"
       - "edsonmichaque/dnsimple-cli:{{ .Major }}.{{ .Minor }}-arm64"
+
+snapcrafts:
+  - name_template: '{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    summary:  A client for DNSimple
+    description: A client for DNSimple
+    grade: stable
+    confinement: classic
+    publish: true
+    channel_templates:
+      - edge
+      - beta
+      - candidate
+      - stable
+      - '{{ .Major }}.{{ .Minor }}/edge'
+      - '{{ .Major }}.{{ .Minor }}/beta'
+      - '{{ .Major }}.{{ .Minor }}/candidate'
+      - '{{ .Major }}.{{ .Minor }}/stable'
+    license: Apache-2.0
+    base: core18
