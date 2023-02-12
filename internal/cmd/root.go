@@ -1,12 +1,30 @@
+// Copyright 2023 Edson Michaque
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/build"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
 )
 
 var (
@@ -14,7 +32,19 @@ var (
 	profile    string
 )
 
-func NewCmdRoot(opts *CmdOpt) *cobra.Command {
+const (
+	flagAccount             = "account"
+	flagAccessToken         = "access-token"
+	flagBaseURL             = "base-url"
+	flagSandbox             = "sandbox"
+	flagProfile             = "profile"
+	flagConfig              = "config"
+	envPrefix               = "DNSIMPLE"
+	defaultProfile          = "default"
+	defaultConfigFileFormat = "yaml"
+)
+
+func NewCmdRoot(opts *internal.CmdOpt) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "dnsimple",
 		Version: build.Version,
@@ -49,16 +79,18 @@ func NewCmdRoot(opts *CmdOpt) *cobra.Command {
 	cmd.AddCommand(NewCmdLetsEncrypt(opts))
 	cmd.AddCommand(NewCmdTransfer(opts))
 	cmd.AddCommand(NewCmdAccounts(opts))
+	cmd.AddCommand(NewCmdConfig(opts))
 
-	cmd.PersistentFlags().String("base-url", "", "Base URL")
-	cmd.PersistentFlags().String("access-token", "", "Access token")
-	cmd.PersistentFlags().Bool("sandbox", false, "Sandbox environment")
-	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "Configuration file")
-	cmd.PersistentFlags().StringVar(&profile, "profile", "default", "Profile")
+	cmd.PersistentFlags().String(flagAccount, "", "Account")
+	cmd.PersistentFlags().String(flagBaseURL, "", "Base URL")
+	cmd.PersistentFlags().String(flagAccessToken, "", "Access token")
+	cmd.PersistentFlags().Bool(flagSandbox, false, "Sandbox environment")
+	cmd.PersistentFlags().StringVarP(&configFile, flagConfig, "c", "", "Configuration file")
+	cmd.PersistentFlags().StringVar(&profile, flagProfile, defaultProfile, "Profile")
 
-	cmd.MarkFlagsMutuallyExclusive("base-url", "sandbox")
+	cmd.MarkFlagsMutuallyExclusive(flagBaseURL, flagSandbox)
 
-	viper.SetEnvPrefix("DNSIMPLE")
+	viper.SetEnvPrefix(envPrefix)
 	_ = viper.BindPFlags(cmd.PersistentFlags())
 
 	return cmd
@@ -73,7 +105,7 @@ func lookupConfigFiles() {
 
 		viper.AddConfigPath(filepath.Join(home, "dnsimple"))
 		viper.AddConfigPath("/etc/dnsimple")
-		viper.SetConfigType("yaml")
+		viper.SetConfigType(defaultConfigFileFormat)
 		viper.SetConfigName(profile)
 	}
 

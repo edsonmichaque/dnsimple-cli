@@ -1,38 +1,59 @@
+// Copyright 2023 Edson Michaque
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package cmd
 
 import (
 	"context"
-	"errors"
+	"io"
+	"os"
+
+	"github.com/edsonmichaque/dnsimple-cli/internal"
+	"github.com/edsonmichaque/dnsimple-cli/internal/config"
+	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-func NewCmdAccounts(opts *CmdOpt) *cobra.Command {
+func NewCmdAccounts(opts *internal.CmdOpt) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "accounts",
 		Short: "Accounts",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			baseURL := viper.GetString("base-url")
+			internal.SetupIO(cmd, opts)
 
-			sandbox := viper.GetBool("sandbox")
-			if sandbox {
-				baseURL = "https://api.sandbox.dnsimple.com"
-			}
-
-			accessToken := viper.GetString("access-token")
-
-			if opts.Client == nil {
-				return errors.New("invalid client builder")
-			}
-
-			client := opts.Client(baseURL, accessToken)
-
-			resp, err := client.Accounts.ListAccounts(context.Background(), nil)
+			cfg, err := config.New()
 			if err != nil {
 				return err
 			}
 
-			cmd.Printf("%#q\n", resp.Data)
+			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Accounts.ListAccounts(context.Background(), nil)
+			if err != nil {
+				return err
+			}
+
+			reader, err := printer.Print(printer.Account(resp.Data), printer.Options{
+				Format: printer.FormatTable,
+			})
+			if err != nil {
+				return err
+			}
+
+			if _, err := io.Copy(os.Stdout, reader); err != nil {
+				return err
+			}
 
 			return nil
 		},
