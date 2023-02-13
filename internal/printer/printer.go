@@ -18,8 +18,10 @@ package printer
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/jmespath/go-jmespath"
 	"io"
 	"strings"
 	"text/tabwriter"
@@ -37,10 +39,12 @@ type Printer interface {
 	Columns() []string
 	Data() []map[string]string
 	JSON() (io.Reader, error)
+	Unwrap() interface{}
 }
 
 type Options struct {
 	Format Format
+	Query  string
 }
 
 func Print(p Printer, opts Options) (io.Reader, error) {
@@ -48,12 +52,41 @@ func Print(p Printer, opts Options) (io.Reader, error) {
 	case FormatText:
 		return nil, errors.New("not implemented")
 	case FormatJSON:
-		return p.JSON()
+		return printJSON(p, opts)
 	case FormatTable:
 		return printTable(p, opts)
 	default:
 		return nil, errors.New("not implemented")
 	}
+}
+
+func printJSON(p Printer, opts Options) (io.Reader, error) {
+	if opts.Query == "" {
+		return p.JSON()
+	}
+
+	data, err := json.Marshal(p.Unwrap())
+	if err != nil {
+		return nil, err
+	}
+
+	var x interface{}
+
+	if err := json.Unmarshal(data, &x); err != nil {
+		return nil, err
+	}
+
+	result, err := jmespath.Search(opts.Query, x)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.NewReader(out), nil
 }
 
 func printTable(p Printer, _ Options) (io.Reader, error) {

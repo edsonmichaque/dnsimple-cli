@@ -41,6 +41,10 @@ func (a Collaborators) Columns() []string {
 	}
 }
 
+func (a Collaborators) Unwrap() interface{} {
+	return a
+}
+
 func (a Collaborators) Data() []map[string]string {
 	data := make([]map[string]string, 0, len(a))
 

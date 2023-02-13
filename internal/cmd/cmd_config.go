@@ -87,6 +87,9 @@ func NewCmdConfig(opts *internal.CmdOpt) *cobra.Command {
 		},
 	}
 
+	cmd.AddCommand(NewCmdConfigGet(opts))
+	cmd.AddCommand(NewCmdConfigSet(opts))
+
 	return cmd
 }
 

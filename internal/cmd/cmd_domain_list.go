@@ -28,12 +28,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdCollaboratorList(opts *internal.CmdOpt) *cobra.Command {
+func NewCmdDomainList(opts *internal.CmdOpt) *cobra.Command {
 	viper := viper.New()
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List collaborators",
+		Short: "List domains",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
@@ -42,16 +42,24 @@ func NewCmdCollaboratorList(opts *internal.CmdOpt) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString("domain")
-
-			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Domains.ListCollaborators(context.Background(), cfg.Account, domain, nil)
+			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Domains.ListDomains(context.Background(), cfg.Account, nil)
 			if err != nil {
 				return err
 			}
 
-			reader, err := printer.Print(printer.Collaborators(resp.Data), printer.Options{
+			if err := checkQueryFlag(viper); err != nil {
+				return err
+			}
+
+			printOpts := printer.Options{
 				Format: printer.Format(viper.GetString("format")),
-			})
+			}
+
+			if query := viper.GetString("query"); query != "" {
+				printOpts.Query = query
+			}
+
+			reader, err := printer.Print(printer.Domains(resp.Data), printOpts)
 			if err != nil {
 				return err
 			}
@@ -64,10 +72,9 @@ func NewCmdCollaboratorList(opts *internal.CmdOpt) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("domain", "", "Domain")
-	cmd.Flags().String("format", "table", "Domain")
-
-	_ = cmd.MarkFlagRequired("domain")
+	addPaginationFlags(cmd)
+	addQueryFlags(cmd)
+	addFormatFlags(cmd, "table")
 
 	_ = viper.BindPFlags(cmd.Flags())
 

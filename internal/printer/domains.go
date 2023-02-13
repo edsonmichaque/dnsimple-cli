@@ -44,6 +44,10 @@ func (a Domains) Columns() []string {
 	}
 }
 
+func (a Domains) Unwrap() interface{} {
+	return a
+}
+
 func (a Domains) Data() []map[string]string {
 	data := make([]map[string]string, 0, len(a))
 

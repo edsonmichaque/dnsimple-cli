@@ -17,41 +17,51 @@
 package cmd
 
 import (
-	"context"
-	"io"
-	"os"
-
+	"errors"
 	"github.com/edsonmichaque/dnsimple-cli/internal"
-	"github.com/edsonmichaque/dnsimple-cli/internal/config"
-	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"strconv"
 )
 
-func NewCmdDomainList(opts *internal.CmdOpt) *cobra.Command {
+var configPropValidate = map[string]func(string) (interface{}, error){
+	"sandbox": func(value string) (interface{}, error) {
+		return strconv.ParseBool(value)
+	},
+	"account": func(value string) (interface{}, error) {
+		return strconv.ParseInt(value, 10, 64)
+	},
+	"base-url": func(value string) (interface{}, error) {
+		return value, nil
+	},
+	"access-token": func(value string) (interface{}, error) {
+		return value, nil
+	},
+}
+
+func NewCmdConfigSet(opts *internal.CmdOpt) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List domains",
+		Use:   "set",
+		Short: "Manage configurations",
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
+			if _, ok := configProps[args[0]]; !ok {
+				return errors.New("not found")
+			}
 
-			cfg, err := config.New()
+			validate := configPropValidate[args[0]]
+			if validate == nil {
+				return errors.New("no validator found")
+			}
+
+			value, err := validate(args[1])
 			if err != nil {
 				return err
 			}
 
-			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Domains.ListDomains(context.Background(), cfg.Account, nil)
-			if err != nil {
-				return err
-			}
+			viper.Set(args[0], value)
 
-			reader, err := printer.Print(printer.Domains(resp.Data), printer.Options{
-				Format: printer.FormatTable,
-			})
-			if err != nil {
-				return err
-			}
-
-			if _, err := io.Copy(os.Stdout, reader); err != nil {
+			if err := viper.WriteConfig(); err != nil {
 				return err
 			}
 

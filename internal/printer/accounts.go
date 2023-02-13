@@ -37,6 +37,10 @@ func (a Account) Columns() []string {
 	}
 }
 
+func (a Account) Unwrap() interface{} {
+	return a
+}
+
 func (a Account) Data() []map[string]string {
 	data := make([]map[string]string, 0, len(a))
 
