@@ -103,7 +103,8 @@ func printJSON(j jsonPrinter, opts *Options) (io.Reader, error) {
 
 	var result interface{}
 
-	if err := json.Unmarshal(data, &result); err != nil {
+	err = json.Unmarshal(data, &result)
+	if err != nil {
 		return nil, err
 	}
 
@@ -130,7 +131,8 @@ func printYAML(j jsonPrinter, opts *Options) (io.Reader, error) {
 
 	var result interface{}
 
-	if err := json.Unmarshal(data, &result); err != nil {
+	err = json.Unmarshal(data, &result)
+	if err != nil {
 		return nil, err
 	}
 
