@@ -51,6 +51,8 @@ func NewCmdRoot(opts *internal.CmdOpt) *cobra.Command {
 		SilenceUsage: true,
 	}
 
+	cmd.AddCommand(NewCmdAccounts(opts))
+
 	cobra.OnInitialize(lookupConfigFiles)
 
 	cmd.PersistentFlags().String(flagAccount, "", "Account")

@@ -3,9 +3,12 @@ module github.com/edsonmichaque/dnsimple-cli
 go 1.19
 
 require (
+	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/dnsimple/dnsimple-go v1.0.1
+	github.com/jmespath/go-jmespath v0.4.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -29,5 +32,4 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
