@@ -26,8 +26,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCommandOpts() *CmdOpt {
-	return &CmdOpt{
+func NewCommandOpts() *CommandOptions {
+	return &CommandOptions{
 		Stdin:  os.Stdin,
 		Stderr: os.Stderr,
 		Stdout: os.Stdout,
@@ -35,7 +35,7 @@ func NewCommandOpts() *CmdOpt {
 	}
 }
 
-type CmdOpt struct {
+type CommandOptions struct {
 	Stdout io.Writer
 	Stdin  io.Reader
 	Stderr io.Writer
@@ -43,7 +43,7 @@ type CmdOpt struct {
 	Client func(string, string) *dnsimple.Client
 }
 
-func (c CmdOpt) Validate() error {
+func (c CommandOptions) Validate() error {
 	if c.Client == nil {
 		return errors.New("invalid client builder")
 	}
@@ -51,7 +51,7 @@ func (c CmdOpt) Validate() error {
 	return nil
 }
 
-func (c CmdOpt) BuildClient(url, token string) *dnsimple.Client {
+func (c CommandOptions) BuildClient(url, token string) *dnsimple.Client {
 	client := c.Client
 
 	if client == nil {
@@ -71,7 +71,7 @@ func buildClient(url, token string) *dnsimple.Client {
 	return client
 }
 
-func SetupIO(cmd *cobra.Command, opts *CmdOpt) {
+func SetupIO(cmd *cobra.Command, opts *CommandOptions) {
 	if opts.Stdout != nil {
 		cmd.SetOut(opts.Stdout)
 	}

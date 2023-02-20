@@ -44,7 +44,7 @@ const (
 	defaultConfigFileFormat = "yaml"
 )
 
-func NewCmdRoot(opts *internal.CmdOpt) *cobra.Command {
+func NewCmdRoot(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "dnsimple",
 		Version:      build.Version,
@@ -52,6 +52,7 @@ func NewCmdRoot(opts *internal.CmdOpt) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewCmdAccounts(opts))
+	cmd.AddCommand(NewCmdWhoami(opts))
 
 	cobra.OnInitialize(lookupConfigFiles)
 
