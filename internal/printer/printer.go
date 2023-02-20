@@ -185,5 +185,4 @@ func printTable(t tablePrinter) (io.Reader, error) {
 	}
 
 	return buf, nil
-
 }

@@ -30,7 +30,7 @@ import (
 )
 
 func NewCmdAccounts(opts *internal.CmdOpt) *cobra.Command {
-	viper := viper.New()
+	v := viper.New()
 
 	cmd := &cobra.Command{
 		Use:   "accounts",
@@ -56,7 +56,7 @@ func NewCmdAccounts(opts *internal.CmdOpt) *cobra.Command {
 				return err
 			}
 
-			output := viper.GetString("output")
+			output := v.GetString("output")
 			if output != "table" && output != "json" && output != "yaml" {
 				return errors.New("invalid output format")
 			}
@@ -64,7 +64,7 @@ func NewCmdAccounts(opts *internal.CmdOpt) *cobra.Command {
 			printData, err := printer.Print(printer.AccountList(*resp), &printer.Options{
 				Format: printer.Format(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: viper.GetString("query"),
+				Query: v.GetString("query"),
 			})
 			if err != nil {
 				return err
@@ -81,7 +81,7 @@ func NewCmdAccounts(opts *internal.CmdOpt) *cobra.Command {
 	addOutputFlags(cmd, "table")
 	addQueryFlags(cmd)
 
-	if err := viper.BindPFlags(cmd.Flags()); err != nil {
+	if err := v.BindPFlags(cmd.Flags()); err != nil {
 		panic(err)
 	}
 
