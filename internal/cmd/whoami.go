@@ -21,7 +21,6 @@ import (
 	"errors"
 	"io"
 
-	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
@@ -29,39 +28,31 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdAccounts(opts *internal.CmdOpt) *cobra.Command {
+func NewCmdWhoami(opts *internal.CmdOpt) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
-		Use:   "accounts",
-		Short: "List accounts",
-		Example: heredoc.Doc(`
-			dnsimple acounts
-			dnsimple accounts --output=json
-			dnsimple accounts --output=yaml
-			dnsimple accounts --output=json --query="[].id"
-		`),
+		Use:   "whoami",
+		Short: "Check identity",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
 			cfg, err := config.New()
 			if err != nil {
-				// TODO: pretty print error
 				return err
 			}
 
-			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Accounts.ListAccounts(context.Background(), nil)
+			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Identity.Whoami(context.Background())
 			if err != nil {
-				// TODO: pretty print error returned from the API client
 				return err
 			}
 
 			output := v.GetString("output")
-			if output != "table" && output != "json" && output != "yaml" {
+			if output != "text" && output != "json" && output != "yaml" {
 				return errors.New("invalid output format")
 			}
 
-			printData, err := printer.Print(printer.AccountList(*resp), &printer.Options{
+			printData, err := printer.Print(printer.Whoami(*resp), &printer.Options{
 				Format: printer.Format(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: v.GetString("query"),
@@ -78,7 +69,7 @@ func NewCmdAccounts(opts *internal.CmdOpt) *cobra.Command {
 		},
 	}
 
-	addOutputFlags(cmd, "table")
+	addOutputFlags(cmd, "text")
 	addQueryFlags(cmd)
 
 	if err := v.BindPFlags(cmd.Flags()); err != nil {
@@ -86,12 +77,4 @@ func NewCmdAccounts(opts *internal.CmdOpt) *cobra.Command {
 	}
 
 	return cmd
-}
-
-func addOutputFlags(cmd *cobra.Command, format string) {
-	cmd.Flags().StringP("output", "o", format, "Output format")
-}
-
-func addQueryFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP("query", "q", "", "Query")
 }
