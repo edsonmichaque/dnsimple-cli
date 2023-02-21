@@ -38,6 +38,7 @@ const (
 	formatJSON  = "json"
 	formatYAML  = "yaml"
 	formatTable = "table"
+	formatText  = "text"
 )
 
 func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
@@ -50,6 +51,7 @@ func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 	cmd.AddCommand(NewCmdDomainList(opts))
 	cmd.AddCommand(NewCmdDomainDelete(opts))
 	cmd.AddCommand(NewCmdDomainCreate(opts))
+	cmd.AddCommand(NewCmdDomainGet(opts))
 
 	return cmd
 }
@@ -221,6 +223,68 @@ func NewCmdDomainCreate(opts *internal.CommandOptions) *cobra.Command {
 			return nil
 		},
 	}
+
+	return cmd
+}
+
+func NewCmdDomainGet(opts *internal.CommandOptions) *cobra.Command {
+	v := viper.New()
+
+	cmd := &cobra.Command{
+		Use:   "show",
+		Short: "Retrieve a domain",
+		Example: heredoc.Doc(`
+			dnsimple domain show --domain example.com
+			dnsimple domain show --domain example.com --sandbox
+		`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SetupIO(cmd, opts)
+
+			cfg, err := config.New()
+			if err != nil {
+				return err
+			}
+
+			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			resp, err := apiClient.Domains.GetDomain(
+				context.Background(),
+				cfg.Account,
+				v.GetString("domain"),
+			)
+			if err != nil {
+				return err
+			}
+
+			output := v.GetString("output")
+			if output != formatText && output != formatJSON && output != formatYAML {
+				return errors.New("invalid output format")
+			}
+
+			printData, err := printer.Print(printer.DomainItem(*resp), &printer.Options{
+				Format: printer.Format(output),
+				// TODO: query should be only used for JSON and YAML output formats
+				Query: v.GetString("query"),
+			})
+			if err != nil {
+				return err
+			}
+
+			if _, err := io.Copy(cmd.OutOrStdout(), printData); err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+
+	addDomainFlag(cmd)
+
+	cmd.Flags().Bool("whois-privacy", false, "check whois privacy")
+
+	addQueryFlag(cmd)
+	addOutputFlag(cmd, "text")
+
+	_ = v.BindPFlags(cmd.Flags())
 
 	return cmd
 }
