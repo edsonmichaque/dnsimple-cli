@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 
 	"github.com/edsonmichaque/dnsimple-cli/internal"
-	"github.com/edsonmichaque/dnsimple-cli/internal/build"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -47,7 +46,6 @@ const (
 func NewCmdRoot(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "dnsimple",
-		Version:      build.Version,
 		SilenceUsage: true,
 	}
 
@@ -55,6 +53,7 @@ func NewCmdRoot(opts *internal.CommandOptions) *cobra.Command {
 	cmd.AddCommand(NewCmdConfig(opts))
 	cmd.AddCommand(NewCmdWhoami(opts))
 	cmd.AddCommand(NewCmdDomain(opts))
+	cmd.AddCommand(NewCmdVersion(opts))
 
 	cobra.OnInitialize(lookupConfigFiles)
 
