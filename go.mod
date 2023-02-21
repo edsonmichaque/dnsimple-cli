@@ -6,6 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/dnsimple/dnsimple-go v1.0.1
+	github.com/fatih/color v1.14.1
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
