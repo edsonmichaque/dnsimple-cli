@@ -4,19 +4,22 @@ build:
 
 .PHONY: test
 test:
-	go test -race ./...
+	go test -race -v ./...
 
 .PHONY: dep
-make dep:
+dep:
 	go mod download
+
+.PHONY: lint
+lint:
+	golangci-lint run ./...
 
 .PHONY: release
 release:
 	goreleaser release --clean
 
-
-.PHONY: install-addlicense
-install-addlicense:
+.PHONY: addlicense
+addlicense:
 	go install github.com/google/addlicense@latest
 
 .PHONY: copyright
@@ -24,5 +27,5 @@ copyright: install-addlicense
 	addlicense -c 'Edson Michaque' -y 2023 -l apache -s  .
 
 .PHONY: check-license
-check-license: install-addlicense
+check-license: addlicense
 	addlicense -check .

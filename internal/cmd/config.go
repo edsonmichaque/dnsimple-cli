@@ -19,7 +19,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -71,6 +70,13 @@ func NewCmdConfig(opts *internal.CommandOptions) *cobra.Command {
 		Use:   "config",
 		Short: "Manage configurations",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SetupIO(cmd, opts)
+
+			cfg, err := config.NewWithValidation(false)
+			if err != nil {
+				return err
+			}
+
 			home, err := os.UserConfigDir()
 			if err != nil {
 				return err
@@ -78,19 +84,8 @@ func NewCmdConfig(opts *internal.CommandOptions) *cobra.Command {
 
 			profile := viper.GetString("profile")
 
-			for _, ext := range []string{
-				configFormatJSON,
-				configFormatYAML,
-				configFormatTOML,
-				configFormatYML,
-			} {
-				fname := fmt.Sprintf("%s.%s", profile, strings.ToLower(ext))
-				if stat, _ := os.Stat(filepath.Join(home, "dnsimple", fname)); stat != nil {
-					return fmt.Errorf("there is already a file for profile %s", profile)
-				}
-			}
-
-			cfg, ext, err := runConfigPrompt()
+			cmd.Println(fmt.Sprintf("Configuring profile '%s'", profile))
+			cfg, ext, err := promptConfig(cfg)
 			if err != nil {
 				return err
 			}
@@ -107,7 +102,7 @@ func NewCmdConfig(opts *internal.CommandOptions) *cobra.Command {
 			}
 
 			cfgPath := filepath.Join(home, "dnsimple", fmt.Sprintf("%s.%s", profile, strings.ToLower(ext)))
-			if err := v.SafeWriteConfigAs(cfgPath); err != nil {
+			if err := v.WriteConfigAs(cfgPath); err != nil {
 				return err
 			}
 
@@ -173,44 +168,27 @@ func NewCmdConfigSet(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func runConfigPrompt() (*config.Config, string, error) {
-	const (
-		envDev     = "DEV"
-		envSandbox = "SANDBOX"
-		envProd    = "PROD"
-	)
+const (
+	envDev     = "DEV"
+	envSandbox = "SANDBOX"
+	envProd    = "PROD"
+)
 
-	promptAccountID := &survey.Input{
-		Message: "Account ID",
-	}
-
-	promptAccessToken := &survey.Password{
-		Message: "Access Token",
-	}
-
-	promptEnv := &survey.Select{
-		Message: "Environment",
-		Options: []string{envProd, envSandbox, envDev},
-		Default: envProd,
-	}
-
-	var (
-		accountID   string
-		accessToken string
-		env         string
-	)
-
+func promptConfig(c *config.Config) (*config.Config, string, error) {
 	baseURL := prodBaseURL
 
-	if err := survey.AskOne(promptAccountID, &accountID); err != nil {
+	accountID, err := promptAccountID(c.Account)
+	if err != nil {
 		return nil, "", err
 	}
 
-	if err := survey.AskOne(promptAccessToken, &accessToken); err != nil {
+	accessToken, err := promptAccessToken(c.AccessToken)
+	if err != nil {
 		return nil, "", err
 	}
 
-	if err := survey.AskOne(promptEnv, &env); err != nil {
+	env, err := promptEnvironment(envProd)
+	if err != nil {
 		return nil, "", err
 	}
 
@@ -219,32 +197,19 @@ func runConfigPrompt() (*config.Config, string, error) {
 	}
 
 	if env == envDev {
-		promptBaseURL := &survey.Input{
-			Message: "Base URL",
-		}
-
-		if err := survey.AskOne(promptBaseURL, &baseURL, survey.WithValidator(validateURL)); err != nil {
+		baseURL, err = promptBaseURL(prodBaseURL)
+		if err != nil {
 			return nil, "", err
 		}
 	}
 
-	promptFileFormat := &survey.Select{
-		Message: "File format",
-		Options: []string{configFormatJSON, configFormatYAML, configFormatTOML},
-		Default: configFormatJSON,
-	}
-
-	var fileFormat string
-	if err := survey.AskOne(promptFileFormat, &fileFormat); err != nil {
+	fileFormat, err := promptFileFormat(configFormatJSON)
+	if err != nil {
 		return nil, "", err
 	}
 
-	promptConfirm := &survey.Confirm{
-		Message: "Do you want to save?",
-	}
-
-	var confirmation bool
-	if err := survey.AskOne(promptConfirm, &confirmation); err != nil {
+	confirmation, err := promptConfirmation("Do you want to save?", true)
+	if err != nil {
 		return nil, "", err
 	}
 
@@ -268,17 +233,89 @@ func runConfigPrompt() (*config.Config, string, error) {
 	return &cfg, fileFormat, nil
 }
 
-func validateURL(val interface{}) error {
-	str, ok := val.(string)
-	if !ok {
-		return errors.New("no string")
+func promptAccessToken(value string) (string, error) {
+	prompt := &survey.Input{
+		Message: "Access Token",
+		Default: value,
 	}
 
-	if _, err := url.Parse(str); err != nil {
-		return err
+	var token string
+	if err := survey.AskOne(prompt, &token); err != nil {
+		return "", err
 	}
 
-	fmt.Println("No error")
+	return token, nil
+}
 
-	return nil
+func promptAccountID(value string) (string, error) {
+	prompt := &survey.Input{
+		Message: "Account ID",
+		Default: value,
+	}
+
+	var accountID string
+	if err := survey.AskOne(prompt, &accountID); err != nil {
+		return "", err
+	}
+
+	return accountID, nil
+}
+
+func promptEnvironment(value string) (string, error) {
+	prompt := &survey.Select{
+		Message: "Environment",
+		Options: []string{envProd, envSandbox, envDev},
+		Default: value,
+	}
+
+	var env string
+	if err := survey.AskOne(prompt, &env); err != nil {
+		return "", err
+	}
+
+	return env, nil
+}
+
+func promptBaseURL(value string) (string, error) {
+	prompt := &survey.Input{
+		Message: "Base URL",
+		Default: value,
+	}
+
+	var baseURL string
+	if err := survey.AskOne(prompt, &baseURL); err != nil {
+		return "", err
+	}
+
+	return baseURL, nil
+}
+
+func promptFileFormat(value string) (string, error) {
+	prompt := &survey.Select{
+		Message: "File format",
+		Options: []string{configFormatJSON, configFormatYAML, configFormatTOML},
+		Default: value,
+	}
+
+	var fileFormat string
+	if err := survey.AskOne(prompt, &fileFormat); err != nil {
+		return "", err
+	}
+
+	return fileFormat, nil
+}
+
+func promptConfirmation(msg string, value bool) (bool, error) {
+	var confirmation bool
+
+	prompt := &survey.Confirm{
+		Message: msg,
+		Default: value,
+	}
+
+	if err := survey.AskOne(prompt, &confirmation); err != nil {
+		return false, err
+	}
+
+	return confirmation, nil
 }
