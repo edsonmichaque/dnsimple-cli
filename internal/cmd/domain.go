@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -32,6 +33,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	formatJSON  = "json"
+	formatYAML  = "yaml"
+	formatTable = "table"
+)
+
 func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "domain",
@@ -41,15 +48,10 @@ func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 
 	cmd.AddCommand(NewCmdDomainList(opts))
 	cmd.AddCommand(NewCmdDomainDelete(opts))
+	cmd.AddCommand(NewCmdDomainCreate(opts))
 
 	return cmd
 }
-
-const (
-	formatJSON  = "json"
-	formatYAML  = "yaml"
-	formatTable = "table"
-)
 
 func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 	v := viper.New()
@@ -119,8 +121,8 @@ func NewCmdDomainDelete(opts *internal.CommandOptions) *cobra.Command {
 		Short: "Delete a domain",
 		Args:  cobra.NoArgs,
 		Example: heredoc.Doc(`
-			$ dnsimple domain delete --domain example.com
-			$ dnsimple domain delete --domain example.com --sandbox
+			dnsimple domain delete --domain example.com
+			dnsimple domain delete --domain example.com --sandbox
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
@@ -166,6 +168,57 @@ func NewCmdDomainDelete(opts *internal.CommandOptions) *cobra.Command {
 
 	if err := v.BindPFlags(cmd.Flags()); err != nil {
 		panic(err)
+	}
+
+	return cmd
+}
+
+func NewCmdDomainCreate(opts *internal.CommandOptions) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "new",
+		Short: "Create a domain",
+		Example: heredoc.Doc(`
+			dnsimple domain new --domain example.com
+			dnsimple domain new --domain example.com --sandbox
+		`),
+		Args: cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SetupIO(cmd, opts)
+
+			cfg, err := config.New()
+			if err != nil {
+				return err
+			}
+
+			var domain dnsimple.Domain
+			if len(args) != 0 {
+				err = json.Unmarshal([]byte(args[0]), &domain)
+				if err != nil {
+					return err
+				}
+			}
+
+			if domain == (dnsimple.Domain{}) {
+				domain.Name, err = runPromptDomainName()
+				if err != nil {
+					return nil
+				}
+			}
+
+			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+
+			resp, err := apiClient.Domains.CreateDomain(
+				context.Background(),
+				cfg.Account,
+				domain)
+			if err != nil {
+				return err
+			}
+
+			cmd.Printf("✓ Created domain %s\n", resp.Data.Name)
+
+			return nil
+		},
 	}
 
 	return cmd
