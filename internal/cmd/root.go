@@ -62,12 +62,14 @@ func NewCmdRoot(opts *internal.CommandOptions) *cobra.Command {
 	cmd.PersistentFlags().String(flagAccessToken, "", "Access token")
 	cmd.PersistentFlags().Bool(flagSandbox, false, "Sandbox environment")
 	cmd.PersistentFlags().StringVarP(&configFile, flagConfig, "c", "", "Configuration file")
-	cmd.PersistentFlags().StringVar(&profile, flagProfile, "", "Profile")
+	cmd.PersistentFlags().StringVar(&profile, flagProfile, "default", "Profile")
 
 	cmd.MarkFlagsMutuallyExclusive(flagBaseURL, flagSandbox)
 
 	viper.SetEnvPrefix(envPrefix)
-	_ = viper.BindPFlags(cmd.PersistentFlags())
+	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
+		panic(err)
+	}
 
 	return cmd
 }

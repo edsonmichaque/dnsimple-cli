@@ -28,13 +28,19 @@ const (
 )
 
 func New() (*Config, error) {
+	return NewWithValidation(true)
+}
+
+func NewWithValidation(validation bool) (*Config, error) {
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
 
-	if err := cfg.Validate(); err != nil {
-		return nil, err
+	if validation {
+		if err := cfg.Validate(); err != nil {
+			return nil, err
+		}
 	}
 
 	if cfg.Sandbox {
