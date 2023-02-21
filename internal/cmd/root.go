@@ -53,6 +53,7 @@ func NewCmdRoot(opts *internal.CommandOptions) *cobra.Command {
 
 	cmd.AddCommand(NewCmdAccounts(opts))
 	cmd.AddCommand(NewCmdWhoami(opts))
+	cmd.AddCommand(NewCmdDomain(opts))
 
 	cobra.OnInitialize(lookupConfigFiles)
 

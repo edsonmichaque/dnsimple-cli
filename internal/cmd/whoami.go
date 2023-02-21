@@ -69,8 +69,8 @@ func NewCmdWhoami(opts *internal.CommandOptions) *cobra.Command {
 		},
 	}
 
-	addOutputFlags(cmd, "text")
-	addQueryFlags(cmd)
+	addOutputFlag(cmd, "text")
+	addQueryFlag(cmd)
 
 	if err := v.BindPFlags(cmd.Flags()); err != nil {
 		panic(err)
