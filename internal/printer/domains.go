@@ -46,20 +46,22 @@ func (a DomainList) printHeader() []string {
 func (a DomainList) printRows() []map[string]string {
 	data := make([]map[string]string, 0, len(a.Data))
 
-	for _, k := range a.Data {
+	domains := a.Data
+
+	for i := range domains {
 		data = append(data, map[string]string{
-			"ID":            fmt.Sprintf("%d", k.ID),
-			"ACCOUNT ID":    fmt.Sprintf("%d", k.AccountID),
-			"REGISTRANT ID": fmt.Sprintf("%d", k.RegistrantID),
-			"NAME":          k.Name,
-			"UNICODE NAME":  k.UnicodeName,
-			"TOKEN":         k.Token,
-			"STATE":         k.State,
-			"AUTO RENEW":    fmt.Sprintf("%t", k.AutoRenew),
-			"PRIVATE WHOIS": fmt.Sprintf("%t", k.PrivateWhois),
-			"EXPIRES AT":    k.ExpiresAt,
-			"CREATED AT":    k.CreatedAt,
-			"UPDATED AT":    k.UpdatedAt,
+			"ID":            fmt.Sprintf("%d", domains[i].ID),
+			"ACCOUNT ID":    fmt.Sprintf("%d", domains[i].AccountID),
+			"REGISTRANT ID": fmt.Sprintf("%d", domains[i].RegistrantID),
+			"NAME":          domains[i].Name,
+			"UNICODE NAME":  domains[i].UnicodeName,
+			"TOKEN":         domains[i].Token,
+			"STATE":         domains[i].State,
+			"AUTO RENEW":    fmt.Sprintf("%t", domains[i].AutoRenew),
+			"PRIVATE WHOIS": fmt.Sprintf("%t", domains[i].PrivateWhois),
+			"EXPIRES AT":    domains[i].ExpiresAt,
+			"CREATED AT":    domains[i].CreatedAt,
+			"UPDATED AT":    domains[i].UpdatedAt,
 		})
 	}
 

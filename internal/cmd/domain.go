@@ -42,6 +42,12 @@ func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
+const (
+	formatJSON  = "json"
+	formatYAML  = "yaml"
+	formatTable = "table"
+)
+
 func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 	v := viper.New()
 
@@ -70,7 +76,7 @@ func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 			}
 
 			output := v.GetString("output")
-			if output != "table" && output != "json" && output != "yaml" {
+			if output != formatTable && output != formatJSON && output != formatYAML {
 				return errors.New("invalid output format")
 			}
 
