@@ -22,6 +22,7 @@ import (
 	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/dnsimple/dnsimple-go/dnsimple"
 	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
@@ -29,30 +30,42 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdAccounts(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "domain",
+		Short:   "Manage domains",
+		Aliases: []string{"domains"},
+	}
+
+	cmd.AddCommand(NewCmdDomainList(opts))
+
+	return cmd
+}
+
+func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
-		Use:   "accounts",
-		Short: "List accounts",
+		Use:   "list",
+		Short: "List domains",
 		Example: heredoc.Doc(`
-			dnsimple acounts
-			dnsimple accounts --output=json
-			dnsimple accounts --output=yaml
-			dnsimple accounts --output=json --query="[].id"
+			dnsimple domain list
+			dnsimple domain list --sandbox
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
 			cfg, err := config.New()
 			if err != nil {
-				// TODO: pretty print error
 				return err
 			}
 
-			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Accounts.ListAccounts(context.Background(), nil)
+			client := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+
+			resp, err := client.Domains.ListDomains(context.Background(), cfg.Account, &dnsimple.DomainListOptions{
+				ListOptions: getListOptions(v),
+			})
 			if err != nil {
-				// TODO: pretty print error returned from the API client
 				return err
 			}
 
@@ -61,7 +74,7 @@ func NewCmdAccounts(opts *internal.CommandOptions) *cobra.Command {
 				return errors.New("invalid output format")
 			}
 
-			printData, err := printer.Print(printer.AccountList(*resp), &printer.Options{
+			printData, err := printer.Print(printer.DomainList(*resp), &printer.Options{
 				Format: printer.Format(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: v.GetString("query"),
@@ -78,8 +91,9 @@ func NewCmdAccounts(opts *internal.CommandOptions) *cobra.Command {
 		},
 	}
 
-	addOutputFlag(cmd, "table")
+	addPaginationFlags(cmd)
 	addQueryFlag(cmd)
+	addOutputFlag(cmd, "table")
 
 	if err := v.BindPFlags(cmd.Flags()); err != nil {
 		panic(err)
@@ -88,10 +102,21 @@ func NewCmdAccounts(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func addOutputFlag(cmd *cobra.Command, format string) {
-	cmd.Flags().StringP("output", "o", format, "Output format")
+func addPaginationFlags(cmd *cobra.Command) {
+	cmd.Flags().Int("page", 0, "Page")
+	cmd.Flags().Int("per-page", 0, "Per page")
 }
 
-func addQueryFlag(cmd *cobra.Command) {
-	cmd.Flags().StringP("query", "q", "", "Query")
+func getListOptions(v *viper.Viper) dnsimple.ListOptions {
+	var opts dnsimple.ListOptions
+
+	if page := v.GetInt("page"); page != 0 {
+		opts.Page = &page
+	}
+
+	if perPage := v.GetInt("per-page"); perPage != 0 {
+		opts.PerPage = &perPage
+	}
+
+	return opts
 }
