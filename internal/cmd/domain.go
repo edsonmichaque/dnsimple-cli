@@ -29,6 +29,7 @@ import (
 	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -215,7 +216,7 @@ func NewCmdDomainCreate(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			cmd.Printf("✓ Created domain %s\n", resp.Data.Name)
+			cmd.Printf("%s Created domain %s\n", color.GreenString("✓"), resp.Data.Name)
 
 			return nil
 		},
