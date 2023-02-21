@@ -164,14 +164,18 @@ func NewCmdDomainDelete(opts *internal.CommandOptions) *cobra.Command {
 	addDomainFlag(cmd)
 	addConfirmFlag(cmd)
 
-	v.BindPFlags(cmd.Flags())
+	if err := v.BindPFlags(cmd.Flags()); err != nil {
+		panic(err)
+	}
 
 	return cmd
 }
 
 func addDomainFlag(cmd *cobra.Command) {
 	cmd.Flags().String("domain", "", "Domain flags")
-	cmd.MarkFlagRequired("domain")
+	if err := cmd.MarkFlagRequired("domain"); err != nil {
+		panic(err)
+	}
 }
 
 func runConfirm(domain string) bool {
