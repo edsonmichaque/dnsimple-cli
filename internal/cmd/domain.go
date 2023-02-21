@@ -19,8 +19,10 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/dnsimple/dnsimple-go/dnsimple"
 	"github.com/edsonmichaque/dnsimple-cli/internal"
@@ -38,6 +40,7 @@ func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewCmdDomainList(opts))
+	cmd.AddCommand(NewCmdDomainDelete(opts))
 
 	return cmd
 }
@@ -106,6 +109,100 @@ func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 	}
 
 	return cmd
+}
+
+func NewCmdDomainDelete(opts *internal.CommandOptions) *cobra.Command {
+	v := viper.New()
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "Delete a domain",
+		Args:  cobra.NoArgs,
+		Example: heredoc.Doc(`
+			$ dnsimple domain delete --domain example.com
+			$ dnsimple domain delete --domain example.com --sandbox
+		`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SetupIO(cmd, opts)
+
+			confirm := v.GetBool("confirm")
+
+			if !confirm {
+				if !runConfirm(v.GetString("domain")) {
+					return errors.New("no confirmation")
+				}
+			}
+
+			cfg, err := config.New()
+			if err != nil {
+				return err
+			}
+
+			domain := v.GetString("domain")
+
+			if domain == "" {
+				domain, err = runPromptDomainName()
+				if err != nil {
+					return nil
+				}
+			}
+
+			_, err = opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Domains.DeleteDomain(
+				context.Background(),
+				cfg.Account,
+				domain)
+			if err != nil {
+				return err
+			}
+
+			cmd.Printf("✓ Deleted domain %s", domain)
+
+			return nil
+		},
+	}
+
+	addDomainFlag(cmd)
+	addConfirmFlag(cmd)
+
+	v.BindPFlags(cmd.Flags())
+
+	return cmd
+}
+
+func addDomainFlag(cmd *cobra.Command) {
+	cmd.Flags().String("domain", "", "Domain flags")
+	cmd.MarkFlagRequired("domain")
+}
+
+func runConfirm(domain string) bool {
+	confirm := false
+	prompt := &survey.Confirm{
+		Message: fmt.Sprintf("Do you want to delete domain %s?", domain),
+	}
+
+	if err := survey.AskOne(prompt, &confirm); err != nil {
+		return false
+	}
+
+	return confirm
+}
+
+func addConfirmFlag(cmd *cobra.Command) {
+	cmd.Flags().Bool("confirm", false, "Confirm")
+}
+
+func runPromptDomainName() (string, error) {
+	prompt := &survey.Input{
+		Message: "Domain name",
+	}
+
+	var domain string
+
+	if err := survey.AskOne(prompt, &domain); err != nil {
+		return "", err
+	}
+
+	return domain, nil
 }
 
 func addPaginationFlags(cmd *cobra.Command) {
