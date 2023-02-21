@@ -52,6 +52,7 @@ func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 	cmd.AddCommand(NewCmdDomainDelete(opts))
 	cmd.AddCommand(NewCmdDomainCreate(opts))
 	cmd.AddCommand(NewCmdDomainGet(opts))
+	cmd.AddCommand(NewCmdDomainCollaborator(opts))
 
 	return cmd
 }
