@@ -45,6 +45,7 @@ func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
 
 	cmd.AddCommand(NewCmdCollaboratorAdd(opts))
 	cmd.AddCommand(NewCmdCollaboratorList(opts))
+	cmd.AddCommand(NewCmdCollaboratorRemove(opts))
 
 	addDomainPersistentFlag(cmd)
 
@@ -136,6 +137,58 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 	}
 
 	return cmd
+}
+
+func NewCmdCollaboratorRemove(opts *internal.CommandOptions) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "remove --domain [DOMAIN]",
+		Short: "Remove collaborator",
+		Args:  cobra.NoArgs,
+		Example: heredoc.Doc(`
+			dnsimple collaborator
+		`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SetupIO(cmd, opts)
+
+			cfg, err := config.New()
+			if err != nil {
+				return err
+			}
+
+			domain := viper.GetString("domain")
+
+			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+
+			_, err = apiClient.Domains.RemoveCollaborator(
+				context.Background(),
+				cfg.Account,
+				domain,
+				viper.GetInt64("collaborator-id"),
+			)
+			if err != nil {
+				return err
+			}
+
+			cmd.Printf("✓ Deleted collaborator %v", viper.GetInt64("collaborator-id"))
+
+			return nil
+		},
+	}
+
+	addCollaboratorIDFlag(cmd)
+
+	if err := viper.BindPFlags(cmd.Flags()); err != nil {
+		panic(err)
+	}
+
+	return cmd
+}
+
+func addCollaboratorIDFlag(cmd *cobra.Command) {
+	cmd.Flags().Int64("collaborator-id", 0, "Collaborator id")
+	if err := cmd.MarkFlagRequired("collaborator-id"); err != nil {
+		panic(err)
+	}
 }
 
 func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
