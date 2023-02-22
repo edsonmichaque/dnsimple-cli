@@ -53,6 +53,7 @@ func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 	cmd.AddCommand(NewCmdDomainCreate(opts))
 	cmd.AddCommand(NewCmdDomainGet(opts))
 	cmd.AddCommand(NewCmdDomainCollaborator(opts))
+	cmd.AddCommand(NewCmdDomainDNSSec(opts))
 
 	return cmd
 }
