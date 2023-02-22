@@ -80,25 +80,21 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 
 			var rawBody []byte
 
-			if len(args) == 0 {
-				if fromFile == "-" {
-					rawBody, err = io.ReadAll(cmd.InOrStdin())
-					if err != nil {
-						return err
-					}
+			if fromFile == "-" {
+				rawBody, err = io.ReadAll(cmd.InOrStdin())
+				if err != nil {
+					return err
 				}
-
-				if fromFile != "" {
-					rawBody, err = os.ReadFile(fromFile)
-					if err != nil {
-						return err
-					}
-				}
-
-				return errors.New("error")
 			}
 
-			if len(args[0]) != 0 {
+			if fromFile != "" {
+				rawBody, err = os.ReadFile(fromFile)
+				if err != nil {
+					return err
+				}
+			}
+
+			if len(args) != 0 {
 				rawBody = []byte(args[0])
 			}
 
@@ -137,8 +133,6 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 }
 
 func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
-	//viper := viper.New()
-
 	cmd := &cobra.Command{
 		Use: "list",
 		Example: heredoc.Doc(`
