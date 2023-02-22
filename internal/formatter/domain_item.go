@@ -1,4 +1,4 @@
-package printer
+package formatter
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 type DomainItem dnsimple.DomainResponse
 
-func (d DomainItem) PrintText(opts *Options) (io.Reader, error) {
+func (d DomainItem) FormatText(opts *Options) (io.Reader, error) {
 	keys := []string{
 		"id",
 		"account_id",
@@ -65,14 +65,14 @@ func (d DomainItem) PrintText(opts *Options) (io.Reader, error) {
 	return buf, nil
 }
 
-func (d DomainItem) PrintJSON(opts *Options) (io.Reader, error) {
-	return printJSON(d, opts)
+func (d DomainItem) FormatJSON(opts *Options) (io.Reader, error) {
+	return formatJSON(d, opts)
 }
 
-func (d DomainItem) PrintYAML(opts *Options) (io.Reader, error) {
-	return printYAML(d, opts)
+func (d DomainItem) FormatYAML(opts *Options) (io.Reader, error) {
+	return formatYAML(d, opts)
 }
 
-func (d DomainItem) toJSON(opts *Options) ([]byte, error) {
+func (d DomainItem) formatJSON(opts *Options) ([]byte, error) {
 	return json.MarshalIndent(d.Data, "", "  ")
 }

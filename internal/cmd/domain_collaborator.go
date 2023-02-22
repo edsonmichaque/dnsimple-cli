@@ -29,7 +29,7 @@ import (
 	"github.com/dnsimple/dnsimple-go/dnsimple"
 	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
-	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
+	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -225,8 +225,8 @@ func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
 				return errors.New("invalid output format")
 			}
 
-			reader, err := printer.Print(printer.CollaboratorList(*resp), &printer.Options{
-				Format: printer.Format(output),
+			reader, err := formatter.Format(formatter.CollaboratorList(*resp), &formatter.Options{
+				OutputFormat: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: viper.GetString("query"),
 			})
