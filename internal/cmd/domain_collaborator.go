@@ -255,6 +255,7 @@ func addDomainPersistentFlag(cmd *cobra.Command) {
 		panic(err)
 	}
 }
+
 func addFromFileFlag(cmd *cobra.Command) {
 	cmd.Flags().StringP("from-file", "f", "", "Create from file")
 }
