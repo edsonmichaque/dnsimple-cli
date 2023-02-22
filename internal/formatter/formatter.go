@@ -14,7 +14,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package printer
+package formatter
 
 import (
 	"bytes"
@@ -29,74 +29,74 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Format string
+type OutputFormat string
 
 const (
-	FormatText  = Format("text")
-	FormatTable = Format("table")
-	FormatJSON  = Format("json")
-	FormatYAML  = Format("yaml")
+	OutputFormatText  = OutputFormat("text")
+	OutputFormatTable = OutputFormat("table")
+	OutputFormatJSON  = OutputFormat("json")
+	OutputFormatYAML  = OutputFormat("yaml")
 )
 
 type Options struct {
-	Format Format
-	Query  string
+	OutputFormat OutputFormat
+	Query        string
 }
 
-type YAMLPrinter interface {
-	PrintYAML(opts *Options) (io.Reader, error)
+type YAML interface {
+	FormatYAML(opts *Options) (io.Reader, error)
 }
 
-type JSONPrinter interface {
-	PrintJSON(opts *Options) (io.Reader, error)
+type JSON interface {
+	FormatJSON(opts *Options) (io.Reader, error)
 }
 
-type TablePrinter interface {
-	PrintTable(opts *Options) (io.Reader, error)
+type Table interface {
+	FormatTable(opts *Options) (io.Reader, error)
 }
 
-type TextPrinter interface {
-	PrintText(opts *Options) (io.Reader, error)
+type Text interface {
+	FormatText(opts *Options) (io.Reader, error)
 }
 
-func Print(data interface{}, opts *Options) (io.Reader, error) {
-	if opts.Format == FormatJSON {
-		if printer, ok := data.(JSONPrinter); ok {
-			return printer.PrintJSON(opts)
+func Format(data interface{}, opts *Options) (io.Reader, error) {
+	if opts.OutputFormat == OutputFormatJSON {
+		if formatter, ok := data.(JSON); ok {
+			return formatter.FormatJSON(opts)
 		}
 
-		return nil, errors.New("json printer is not implemented")
+		return nil, errors.New("json formatter is not implemented")
 	}
 
-	if opts.Format == FormatYAML {
-		if printer, ok := data.(YAMLPrinter); ok {
-			return printer.PrintYAML(opts)
+	if opts.OutputFormat == OutputFormatYAML {
+		if formatter, ok := data.(YAML); ok {
+			return formatter.FormatYAML(opts)
 		}
 
-		return nil, errors.New("yaml printer is not implemented")
+		return nil, errors.New("yaml formatter is not implemented")
 	}
 
-	if opts.Format == FormatTable {
-		if printer, ok := data.(TablePrinter); ok {
-			return printer.PrintTable(opts)
+	if opts.OutputFormat == OutputFormatTable {
+		if formatter, ok := data.(Table); ok {
+			return formatter.FormatTable(opts)
 		}
 
-		return nil, errors.New("table printer is not implemented")
+		return nil, errors.New("table formatter is not implemented")
 	}
 
-	if opts.Format == FormatText {
-		if printer, ok := data.(TextPrinter); ok {
-			return printer.PrintText(opts)
+	if opts.OutputFormat == OutputFormatText {
+		if formatter, ok := data.(Text); ok {
+			return formatter.FormatText(opts)
 		}
 
-		return nil, errors.New("table printer is not implemented")
+		return nil, errors.New("table formatter is not implemented")
 	}
 
-	return nil, errors.New("invalid printer")
+	return nil, errors.New("invalid formatter")
 }
 
-func printJSON(j jsonPrinter, opts *Options) (io.Reader, error) {
-	data, err := j.toJSON(opts)
+func formatJSON(j jsonFormatter, opts *Options) (io.Reader, error) {
+	data, err := j.formatJSON(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +123,8 @@ func printJSON(j jsonPrinter, opts *Options) (io.Reader, error) {
 	return bytes.NewReader(out), nil
 }
 
-func printYAML(j jsonPrinter, opts *Options) (io.Reader, error) {
-	data, err := j.toJSON(opts)
+func formatYAML(j jsonFormatter, opts *Options) (io.Reader, error) {
+	data, err := j.formatJSON(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -151,27 +151,27 @@ func printYAML(j jsonPrinter, opts *Options) (io.Reader, error) {
 	return bytes.NewReader(out), nil
 }
 
-type jsonPrinter interface {
-	toJSON(opts *Options) ([]byte, error)
+type jsonFormatter interface {
+	formatJSON(opts *Options) ([]byte, error)
 }
 
-type tablePrinter interface {
-	printHeader() []string
-	printRows() []map[string]string
+type tableFormatter interface {
+	formatHeader() []string
+	formatRows() []map[string]string
 }
 
-func printTable(t tablePrinter) (io.Reader, error) {
+func formatTable(t tableFormatter) (io.Reader, error) {
 	buf := new(bytes.Buffer)
 	tw := tabwriter.NewWriter(buf, 0, 0, 2, ' ', 0)
 
-	if _, err := fmt.Fprintln(tw, strings.Join(t.printHeader(), "\t")); err != nil {
+	if _, err := fmt.Fprintln(tw, strings.Join(t.formatHeader(), "\t")); err != nil {
 		return nil, err
 	}
 
-	for _, v := range t.printRows() {
+	for _, v := range t.formatRows() {
 		row := make([]string, 0)
 
-		for _, col := range t.printHeader() {
+		for _, col := range t.formatHeader() {
 			if v, ok := v[col]; ok {
 				row = append(row, v)
 			}

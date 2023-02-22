@@ -1,4 +1,4 @@
-package printer
+package formatter
 
 import (
 	"encoding/json"
@@ -10,23 +10,23 @@ import (
 
 type DomainList dnsimple.DomainsResponse
 
-func (a DomainList) PrintJSON(opts *Options) (io.Reader, error) {
-	return printJSON(a, opts)
+func (a DomainList) FormatJSON(opts *Options) (io.Reader, error) {
+	return formatJSON(a, opts)
 }
 
-func (a DomainList) PrintYAML(opts *Options) (io.Reader, error) {
-	return printYAML(a, opts)
+func (a DomainList) FormatYAML(opts *Options) (io.Reader, error) {
+	return formatYAML(a, opts)
 }
 
-func (a DomainList) PrintTable(_ *Options) (io.Reader, error) {
-	return printTable(a)
+func (a DomainList) FormatTable(_ *Options) (io.Reader, error) {
+	return formatTable(a)
 }
 
-func (a DomainList) toJSON(opts *Options) ([]byte, error) {
+func (a DomainList) formatJSON(opts *Options) ([]byte, error) {
 	return json.MarshalIndent(a.Data, "", "  ")
 }
 
-func (a DomainList) printHeader() []string {
+func (a DomainList) formatHeader() []string {
 	return []string{
 		"ID",
 		"ACCOUNT ID",
@@ -43,7 +43,7 @@ func (a DomainList) printHeader() []string {
 	}
 }
 
-func (a DomainList) printRows() []map[string]string {
+func (a DomainList) formatRows() []map[string]string {
 	data := make([]map[string]string, 0, len(a.Data))
 
 	domains := a.Data

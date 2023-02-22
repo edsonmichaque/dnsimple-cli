@@ -1,4 +1,4 @@
-package printer
+package formatter
 
 import (
 	"bytes"
@@ -24,7 +24,7 @@ import (
 
 type DSRItem dnsimple.DelegationSignerRecordResponse
 
-func (d DSRItem) PrintText(opts *Options) (io.Reader, error) {
+func (d DSRItem) FormatText(opts *Options) (io.Reader, error) {
 	keys := []string{
 		"id",
 		"domain_id",
@@ -71,14 +71,14 @@ func (d DSRItem) PrintText(opts *Options) (io.Reader, error) {
 	return buf, nil
 }
 
-func (d DSRItem) PrintJSON(opts *Options) (io.Reader, error) {
-	return printJSON(d, opts)
+func (d DSRItem) FormatJSON(opts *Options) (io.Reader, error) {
+	return formatJSON(d, opts)
 }
 
-func (d DSRItem) PrintYAML(opts *Options) (io.Reader, error) {
-	return printYAML(d, opts)
+func (d DSRItem) FormatYAML(opts *Options) (io.Reader, error) {
+	return formatYAML(d, opts)
 }
 
-func (d DSRItem) toJSON(opts *Options) ([]byte, error) {
+func (d DSRItem) formatJSON(opts *Options) ([]byte, error) {
 	return json.MarshalIndent(d.Data, "", "  ")
 }

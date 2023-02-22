@@ -1,4 +1,4 @@
-package printer
+package formatter
 
 import (
 	"encoding/json"
@@ -10,23 +10,23 @@ import (
 
 type CollaboratorList dnsimple.CollaboratorsResponse
 
-func (a CollaboratorList) PrintJSON(opts *Options) (io.Reader, error) {
-	return printJSON(a, opts)
+func (a CollaboratorList) FormatJSON(opts *Options) (io.Reader, error) {
+	return formatJSON(a, opts)
 }
 
-func (a CollaboratorList) PrintYAML(opts *Options) (io.Reader, error) {
-	return printYAML(a, opts)
+func (a CollaboratorList) FormatYAML(opts *Options) (io.Reader, error) {
+	return formatYAML(a, opts)
 }
 
-func (a CollaboratorList) PrintTable(_ *Options) (io.Reader, error) {
-	return printTable(a)
+func (a CollaboratorList) FormatTable(_ *Options) (io.Reader, error) {
+	return formatTable(a)
 }
 
-func (a CollaboratorList) toJSON(opts *Options) ([]byte, error) {
+func (a CollaboratorList) formatJSON(opts *Options) ([]byte, error) {
 	return json.MarshalIndent(a.Data, "", "  ")
 }
 
-func (a CollaboratorList) printHeader() []string {
+func (a CollaboratorList) formatHeader() []string {
 	return []string{
 		"ID",
 		"DOMAIN ID",
@@ -40,7 +40,7 @@ func (a CollaboratorList) printHeader() []string {
 	}
 }
 
-func (a CollaboratorList) printRows() []map[string]string {
+func (a CollaboratorList) formatRows() []map[string]string {
 	data := make([]map[string]string, 0, len(a.Data))
 
 	domains := a.Data

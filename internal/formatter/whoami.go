@@ -1,4 +1,4 @@
-package printer
+package formatter
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 type Whoami dnsimple.WhoamiResponse
 
-func (w Whoami) PrintText(opts *Options) (io.Reader, error) {
+func (w Whoami) FormatText(opts *Options) (io.Reader, error) {
 	var data [][2]interface{}
 
 	if user := w.Data.User; user != nil {
@@ -42,14 +42,14 @@ func (w Whoami) PrintText(opts *Options) (io.Reader, error) {
 	return buf, nil
 }
 
-func (w Whoami) PrintJSON(opts *Options) (io.Reader, error) {
-	return printJSON(w, opts)
+func (w Whoami) FormatJSON(opts *Options) (io.Reader, error) {
+	return formatJSON(w, opts)
 }
 
-func (w Whoami) PrintYAML(opts *Options) (io.Reader, error) {
-	return printYAML(w, opts)
+func (w Whoami) FormatYAML(opts *Options) (io.Reader, error) {
+	return formatYAML(w, opts)
 }
 
-func (w Whoami) toJSON(opts *Options) ([]byte, error) {
+func (w Whoami) formatJSON(opts *Options) ([]byte, error) {
 	return json.MarshalIndent(w.Data, "", "  ")
 }

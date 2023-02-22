@@ -28,7 +28,7 @@ import (
 	"github.com/dnsimple/dnsimple-go/dnsimple"
 	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
-	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
+	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -95,8 +95,8 @@ func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 				return errors.New("invalid output format" + output)
 			}
 
-			printData, err := printer.Print(printer.DomainList(*resp), &printer.Options{
-				Format: printer.Format(output),
+			formattedOutput, err := formatter.Format(formatter.DomainList(*resp), &formatter.Options{
+				OutputFormat: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: viper.GetString("query"),
 			})
@@ -104,7 +104,7 @@ func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			if _, err := io.Copy(cmd.OutOrStdout(), printData); err != nil {
+			if _, err := io.Copy(cmd.OutOrStdout(), formattedOutput); err != nil {
 				return err
 			}
 
@@ -270,8 +270,8 @@ func NewCmdDomainGet(opts *internal.CommandOptions) *cobra.Command {
 				return errors.New("invalid output format")
 			}
 
-			printData, err := printer.Print(printer.DomainItem(*resp), &printer.Options{
-				Format: printer.Format(output),
+			formattedOutput, err := formatter.Format(formatter.DomainItem(*resp), &formatter.Options{
+				OutputFormat: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: viper.GetString("query"),
 			})
@@ -279,7 +279,7 @@ func NewCmdDomainGet(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			if _, err := io.Copy(cmd.OutOrStdout(), printData); err != nil {
+			if _, err := io.Copy(cmd.OutOrStdout(), formattedOutput); err != nil {
 				return err
 			}
 

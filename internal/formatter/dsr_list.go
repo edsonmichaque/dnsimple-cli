@@ -1,4 +1,4 @@
-package printer
+package formatter
 
 import (
 	"encoding/json"
@@ -10,23 +10,23 @@ import (
 
 type DSRList dnsimple.DelegationSignerRecordsResponse
 
-func (a DSRList) PrintJSON(opts *Options) (io.Reader, error) {
-	return printJSON(a, opts)
+func (a DSRList) FormatJSON(opts *Options) (io.Reader, error) {
+	return formatJSON(a, opts)
 }
 
-func (a DSRList) PrintYAML(opts *Options) (io.Reader, error) {
-	return printYAML(a, opts)
+func (a DSRList) FormatYAML(opts *Options) (io.Reader, error) {
+	return formatYAML(a, opts)
 }
 
-func (a DSRList) PrintTable(_ *Options) (io.Reader, error) {
-	return printTable(a)
+func (a DSRList) FormatTable(_ *Options) (io.Reader, error) {
+	return formatTable(a)
 }
 
-func (a DSRList) toJSON(opts *Options) ([]byte, error) {
+func (a DSRList) formatJSON(opts *Options) ([]byte, error) {
 	return json.MarshalIndent(a.Data, "", "  ")
 }
 
-func (a DSRList) printHeader() []string {
+func (a DSRList) formatHeader() []string {
 	return []string{
 		"ID",
 		"DOMAIN ID",
@@ -40,7 +40,7 @@ func (a DSRList) printHeader() []string {
 	}
 }
 
-func (a DSRList) printRows() []map[string]string {
+func (a DSRList) formatRows() []map[string]string {
 	data := make([]map[string]string, 0, len(a.Data))
 
 	dsr := a.Data

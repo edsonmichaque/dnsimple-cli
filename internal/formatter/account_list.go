@@ -1,4 +1,4 @@
-package printer
+package formatter
 
 import (
 	"encoding/json"
@@ -14,23 +14,23 @@ type Filter struct {
 
 type AccountList dnsimple.AccountsResponse
 
-func (a AccountList) PrintJSON(opts *Options) (io.Reader, error) {
-	return printJSON(a, opts)
+func (a AccountList) FormatJSON(opts *Options) (io.Reader, error) {
+	return formatJSON(a, opts)
 }
 
-func (a AccountList) PrintYAML(opts *Options) (io.Reader, error) {
-	return printYAML(a, opts)
+func (a AccountList) FormatYAML(opts *Options) (io.Reader, error) {
+	return formatYAML(a, opts)
 }
 
-func (a AccountList) PrintTable(_ *Options) (io.Reader, error) {
-	return printTable(a)
+func (a AccountList) FormatTable(_ *Options) (io.Reader, error) {
+	return formatTable(a)
 }
 
-func (a AccountList) toJSON(opts *Options) ([]byte, error) {
+func (a AccountList) formatJSON(opts *Options) ([]byte, error) {
 	return json.MarshalIndent(a.Data, "", "  ")
 }
 
-func (a AccountList) printHeader() []string {
+func (a AccountList) formatHeader() []string {
 	return []string{
 		"ID",
 		"EMAIL",
@@ -40,7 +40,7 @@ func (a AccountList) printHeader() []string {
 	}
 }
 
-func (a AccountList) printRows() []map[string]string {
+func (a AccountList) formatRows() []map[string]string {
 	data := make([]map[string]string, 0, len(a.Data))
 
 	for _, k := range a.Data {
