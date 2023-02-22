@@ -36,7 +36,8 @@ import (
 
 func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "collaborator",
+		Use:  "collaborator",
+		Args: cobra.NoArgs,
 		Example: heredoc.Doc(`
 			dnsimple collaborator
 		`),
@@ -197,6 +198,7 @@ func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
 			dnsimple collaborator list --domain example.com
 			dnsimple collaborator list --domain example.com
 		`),
+		Args:  cobra.NoArgs,
 		Short: "List collaborators",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if err := viper.BindPFlags(cmd.Flags()); err != nil {

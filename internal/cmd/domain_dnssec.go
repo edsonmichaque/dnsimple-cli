@@ -29,6 +29,7 @@ func NewCmdDomainDNSSec(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "dnssec",
 		Short: "Manage DNSSEC status",
+		Args:  cobra.NoArgs,
 	}
 
 	cmd.AddCommand(NewCmdDNSSECStatus(opts))

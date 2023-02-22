@@ -23,7 +23,7 @@ addlicense:
 	go install github.com/google/addlicense@latest
 
 .PHONY: copyright
-copyright: install-addlicense
+copyright: addlicense
 	addlicense -c 'Edson Michaque' -y 2023 -l apache -s  .
 
 .PHONY: check-license
