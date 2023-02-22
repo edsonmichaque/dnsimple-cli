@@ -53,7 +53,9 @@ func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 	cmd.AddCommand(NewCmdDomainCreate(opts))
 	cmd.AddCommand(NewCmdDomainGet(opts))
 	cmd.AddCommand(NewCmdDomainCollaborator(opts))
+	cmd.AddCommand(NewCmdDomainDSR(opts))
 	cmd.AddCommand(NewCmdDomainDNSSec(opts))
+	cmd.AddCommand(NewCmdDomainDSR(opts))
 
 	return cmd
 }
@@ -278,10 +280,6 @@ func NewCmdDomainGet(opts *internal.CommandOptions) *cobra.Command {
 			return nil
 		},
 	}
-
-	addDomainFlag(cmd)
-
-	cmd.Flags().Bool("whois-privacy", false, "check whois privacy")
 
 	addQueryFlag(cmd)
 	addOutputFlag(cmd, "text")
