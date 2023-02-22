@@ -57,7 +57,7 @@ func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
 
 func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add",
+		Use:   "add --domain [DOMAIN]",
 		Short: "Add collaborator",
 		Args:  cobra.MaximumNArgs(1),
 		Example: heredoc.Doc(`
@@ -80,22 +80,28 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 
 			var rawBody []byte
 
-			if fromFile == "-" {
-				rawBody, err = io.ReadAll(cmd.InOrStdin())
-				if err != nil {
-					return err
-				}
-			}
-
-			if fromFile != "" {
-				rawBody, err = os.ReadFile(fromFile)
-				if err != nil {
-					return err
-				}
-			}
-
 			if len(args) != 0 {
 				rawBody = []byte(args[0])
+			}
+
+			if len(args) == 0 {
+				if fromFile == "-" {
+					rawBody, err = io.ReadAll(cmd.InOrStdin())
+					if err != nil {
+						return err
+					}
+				}
+
+				if fromFile != "" && fromFile != "-" {
+					rawBody, err = os.ReadFile(fromFile)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			if len(rawBody) == 0 {
+				return errors.New("body is required")
 			}
 
 			var attr dnsimple.CollaboratorAttributes
@@ -134,7 +140,7 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 
 func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "list",
+		Use: "list --domain [DOMAIN]",
 		Example: heredoc.Doc(`
 			dnsimple collaborator list --domain example.com
 			dnsimple collaborator list --domain example.com
