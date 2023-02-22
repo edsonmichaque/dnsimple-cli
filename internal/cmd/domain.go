@@ -75,9 +75,9 @@ func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			client := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
 
-			resp, err := client.Domains.ListDomains(context.Background(), cfg.Account, &dnsimple.DomainListOptions{
+			resp, err := apiClient.Domains.ListDomains(context.Background(), cfg.Account, &dnsimple.DomainListOptions{
 				ListOptions: getListOptions(v),
 			})
 			if err != nil {

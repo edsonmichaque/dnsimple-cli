@@ -29,6 +29,7 @@ import (
 	"github.com/dnsimple/dnsimple-go/dnsimple"
 	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
+	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -43,6 +44,7 @@ func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewCmdCollaboratorAdd(opts))
+	cmd.AddCommand(NewCmdCollaboratorList(opts))
 
 	addDomainPersistentFlag(cmd)
 
@@ -53,23 +55,15 @@ func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func addDomainPersistentFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().String("domain", "", "Domain name")
-	if err := cmd.MarkPersistentFlagRequired("domain"); err != nil {
-		panic(err)
-	}
-}
-func addFormFileFlag(cmd *cobra.Command) {
-	cmd.Flags().StringP("from-file", "f", "", "Create from file")
-}
-
 func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add",
 		Short: "Add collaborator",
 		Args:  cobra.MaximumNArgs(1),
 		Example: heredoc.Doc(`
-			dnsimple collaborator
+			dnsimple collaborator add --domain example.com '{"email":"john.doe@example.com"}'
+			dnsimple collaborator add --domain example.com --from-file email.json
+			dnsimple collaborator add --domain example.com --from-file=-
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
@@ -79,41 +73,41 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString("domain")
+			var (
+				domain   = viper.GetString("domain")
+				fromFile = viper.GetString("from-file")
+			)
 
-			var attr dnsimple.CollaboratorAttributes
+			var rawBody []byte
 
-			var data []byte
-
-			if len(args) == 0 {
-				fromFile := viper.GetString("from-file")
-				if fromFile == "" {
-					return errors.New("data is required")
+			if fromFile == "-" {
+				rawBody, err = io.ReadAll(cmd.InOrStdin())
+				if err != nil {
+					return err
 				}
+			}
 
-				if fromFile == "-" {
-					data, err = io.ReadAll(cmd.InOrStdin())
-					if err != nil {
-						return err
-					}
-				} else {
-					data, err = os.ReadFile(fromFile)
-					if err != nil {
-						return err
-					}
+			if fromFile != "" {
+				rawBody, err = os.ReadFile(fromFile)
+				if err != nil {
+					return err
 				}
 			}
 
 			if len(args) != 0 {
-				data = []byte(args[0])
+				rawBody = []byte(args[0])
 			}
 
-			err = json.Unmarshal(data, &attr)
+			var attr dnsimple.CollaboratorAttributes
+
+			err = json.Unmarshal(rawBody, &attr)
 			if err != nil {
 				return err
 			}
 
-			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Domains.AddCollaborator(
+			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+
+			resp, err := apiClient.Domains.AddCollaborator(
 				context.Background(),
 				cfg.Account,
 				domain,
@@ -129,11 +123,79 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 		},
 	}
 
-	addFormFileFlag(cmd)
+	addFromFileFlag(cmd)
 
 	if err := viper.BindPFlag("from-file", cmd.Flags().Lookup("from-file")); err != nil {
 		panic(err)
 	}
 
 	return cmd
+}
+
+func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "list",
+		Example: heredoc.Doc(`
+			dnsimple collaborator list --domain example.com
+			dnsimple collaborator list --domain example.com
+		`),
+		Short: "List collaborators",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SetupIO(cmd, opts)
+
+			cfg, err := config.New()
+			if err != nil {
+				return err
+			}
+
+			domain := viper.GetString("domain")
+
+			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+
+			resp, err := apiClient.Domains.ListCollaborators(context.Background(), cfg.Account, domain, nil)
+			if err != nil {
+				return err
+			}
+
+			output := viper.GetString("output")
+			if output != formatTable && output != formatJSON && output != formatYAML {
+				return errors.New("invalid output format")
+			}
+
+			reader, err := printer.Print(printer.CollaboratorList(*resp), &printer.Options{
+				Format: printer.Format(output),
+				// TODO: query should be only used for JSON and YAML output formats
+				Query: viper.GetString("query"),
+			})
+			if err != nil {
+				return err
+			}
+
+			if _, err := io.Copy(os.Stdout, reader); err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+
+	addQueryFlag(cmd)
+	addOutputFlag(cmd, "table")
+	addPaginationFlags(cmd)
+
+	if err := viper.BindPFlags(cmd.Flags()); err != nil {
+		panic(err)
+	}
+
+	return cmd
+}
+
+func addDomainPersistentFlag(cmd *cobra.Command) {
+	cmd.PersistentFlags().String("domain", "", "Domain name")
+	if err := cmd.MarkPersistentFlagRequired("domain"); err != nil {
+		panic(err)
+	}
+}
+func addFromFileFlag(cmd *cobra.Command) {
+	cmd.Flags().StringP("from-file", "f", "", "Create from file")
 }
