@@ -47,11 +47,7 @@ func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
 	cmd.AddCommand(NewCmdCollaboratorList(opts))
 	cmd.AddCommand(NewCmdCollaboratorRemove(opts))
 
-	addDomainPersistentFlag(cmd)
-
-	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
-		panic(err)
-	}
+	addDomainRequiredFlag(cmd)
 
 	return cmd
 }
@@ -66,6 +62,11 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 			dnsimple collaborator add --domain example.com --from-file email.json
 			dnsimple collaborator add --domain example.com --from-file=-
 		`),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
@@ -132,10 +133,6 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 
 	addFromFileFlag(cmd)
 
-	if err := viper.BindPFlag("from-file", cmd.Flags().Lookup("from-file")); err != nil {
-		panic(err)
-	}
-
 	return cmd
 }
 
@@ -147,6 +144,11 @@ func NewCmdCollaboratorRemove(opts *internal.CommandOptions) *cobra.Command {
 		Example: heredoc.Doc(`
 			dnsimple collaborator
 		`),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
@@ -175,11 +177,8 @@ func NewCmdCollaboratorRemove(opts *internal.CommandOptions) *cobra.Command {
 		},
 	}
 
+	addDomainRequiredFlag(cmd)
 	addCollaboratorIDFlag(cmd)
-
-	if err := viper.BindPFlags(cmd.Flags()); err != nil {
-		panic(err)
-	}
 
 	return cmd
 }
@@ -199,6 +198,11 @@ func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
 			dnsimple collaborator list --domain example.com
 		`),
 		Short: "List collaborators",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
@@ -242,14 +246,10 @@ func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
 	addOutputFlag(cmd, "table")
 	addPaginationFlags(cmd)
 
-	if err := viper.BindPFlags(cmd.Flags()); err != nil {
-		panic(err)
-	}
-
 	return cmd
 }
 
-func addDomainPersistentFlag(cmd *cobra.Command) {
+func addDomainRequiredFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("domain", "", "Domain name")
 	if err := cmd.MarkPersistentFlagRequired("domain"); err != nil {
 		panic(err)
