@@ -34,6 +34,7 @@ func NewCmdWhoami(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "whoami",
 		Short: "Check identity",
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 

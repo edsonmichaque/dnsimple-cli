@@ -64,6 +64,7 @@ func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List domains",
+		Args:  cobra.NoArgs,
 		Example: heredoc.Doc(`
 			dnsimple domain list
 			dnsimple domain list --sandbox
@@ -180,11 +181,11 @@ func NewCmdDomainDelete(opts *internal.CommandOptions) *cobra.Command {
 
 func NewCmdDomainCreate(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "new",
+		Use:   "create",
 		Short: "Create a domain",
 		Example: heredoc.Doc(`
-			dnsimple domain new --domain example.com
-			dnsimple domain new --domain example.com --sandbox
+			dnsimple domain create --domain example.com
+			dnsimple domain create --domain example.com --sandbox
 		`),
 		Args: cobra.MaximumNArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -236,8 +237,9 @@ func NewCmdDomainCreate(opts *internal.CommandOptions) *cobra.Command {
 
 func NewCmdDomainGet(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "show",
+		Use:   "get",
 		Short: "Retrieve a domain",
+		Args:  cobra.NoArgs,
 		Example: heredoc.Doc(`
 			dnsimple domain show --domain example.com
 			dnsimple domain show --domain example.com --sandbox

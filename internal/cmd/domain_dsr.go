@@ -37,6 +37,7 @@ func NewCmdDomainDSR(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "dsr",
 		Short: "Manage domain signed records",
+		Args:  cobra.NoArgs,
 	}
 
 	cmd.AddCommand(NewCmdDomainDSRCreate(opts))
@@ -52,8 +53,9 @@ func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
-		Use:   "new",
+		Use:   "create",
 		Short: "Create a delegation signer record",
+		Args:  cobra.MaximumNArgs(1),
 		Example: heredoc.Doc(`
 			dnsimple domain dsr create --domain example.com
 			dnsimple domain dsr create --domain example.com --sandbox
@@ -136,6 +138,7 @@ func NewCmdDomainDSRList(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List delegation signer records",
+		Args:  cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if err := viper.BindPFlags(cmd.Flags()); err != nil {
 				panic(err)
@@ -189,8 +192,9 @@ func NewCmdDomainDSRList(opts *internal.CommandOptions) *cobra.Command {
 
 func NewCmdDomainDSRGet(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "show",
+		Use:   "get",
 		Short: "Retrieve a delegation signer record",
+		Args:  cobra.NoArgs,
 		Example: heredoc.Doc(`
 			$ dnsimple dsr get --domain example.com --record-id 1
 			$ dnsimple dsr get --domain example.com --record-id 1 --sandbox

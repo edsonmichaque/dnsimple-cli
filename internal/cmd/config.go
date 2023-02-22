@@ -69,6 +69,7 @@ func NewCmdConfig(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "Manage configurations",
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
@@ -118,7 +119,7 @@ func NewCmdConfig(opts *internal.CommandOptions) *cobra.Command {
 
 func NewCmdConfigGet(opts *internal.CommandOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "show",
+		Use:   "get",
 		Short: "Manage configurations",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
