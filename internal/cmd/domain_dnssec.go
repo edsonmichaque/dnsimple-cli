@@ -35,11 +35,7 @@ func NewCmdDomainDNSSec(opts *internal.CommandOptions) *cobra.Command {
 	cmd.AddCommand(NewCmdDNSSECDisable(opts))
 	cmd.AddCommand(NewCmdDNSSECEnable(opts))
 
-	addDomainPersistentFlag(cmd)
-
-	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
-		panic(err)
-	}
+	addDomainRequiredFlag(cmd)
 
 	return cmd
 }
@@ -49,6 +45,11 @@ func NewCmdDNSSECStatus(opts *internal.CommandOptions) *cobra.Command {
 		Use:   "status",
 		Short: "Retrieve DNSSEC status",
 		Args:  cobra.NoArgs,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
@@ -89,6 +90,11 @@ func NewCmdDNSSECDisable(opts *internal.CommandOptions) *cobra.Command {
 		Use:   "disable",
 		Short: "Disable DNSSEC",
 		Args:  cobra.NoArgs,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
@@ -124,6 +130,11 @@ func NewCmdDNSSECEnable(opts *internal.CommandOptions) *cobra.Command {
 		Use:   "enable",
 		Short: "Enable DNSSEC",
 		Args:  cobra.NoArgs,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 

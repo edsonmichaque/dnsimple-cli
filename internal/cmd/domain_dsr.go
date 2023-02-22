@@ -27,6 +27,7 @@ import (
 	"github.com/dnsimple/dnsimple-go/dnsimple"
 	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
+	"github.com/edsonmichaque/dnsimple-cli/internal/printer"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,17 +40,17 @@ func NewCmdDomainDSR(opts *internal.CommandOptions) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewCmdDomainDSRCreate(opts))
+	cmd.AddCommand(NewCmdDomainDSRList(opts))
+	cmd.AddCommand(NewCmdDomainDSRGet(opts))
 
-	addDomainPersistentFlag(cmd)
-
-	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
-		panic(err)
-	}
+	addDomainRequiredFlag(cmd)
 
 	return cmd
 }
 
 func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
+	v := viper.New()
+
 	cmd := &cobra.Command{
 		Use:   "new",
 		Short: "Create a delegation signer record",
@@ -57,6 +58,11 @@ func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
 			dnsimple domain dsr create --domain example.com
 			dnsimple domain dsr create --domain example.com --sandbox
 		`),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			internal.SetupIO(cmd, opts)
 
@@ -67,7 +73,7 @@ func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
 
 			var (
 				domain   = viper.GetString("domain")
-				fromFile = viper.GetString("from-file")
+				fromFile = v.GetString("from-file")
 			)
 
 			var rawBody []byte
@@ -123,9 +129,128 @@ func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
 
 	addFromFileFlag(cmd)
 
-	if err := viper.BindPFlag("from-file", cmd.Flags().Lookup("from-file")); err != nil {
-		panic(err)
+	return cmd
+}
+
+func NewCmdDomainDSRList(opts *internal.CommandOptions) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "List delegation signer records",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SetupIO(cmd, opts)
+
+			cfg, err := config.New()
+			if err != nil {
+				return err
+			}
+
+			domain := viper.GetString("domain")
+
+			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+
+			resp, err := apiClient.Domains.ListDelegationSignerRecords(context.Background(), cfg.Account, domain, getListOptionsP())
+			if err != nil {
+				return err
+			}
+
+			output := viper.GetString("output")
+			if output != formatTable && output != formatJSON && output != formatYAML {
+				return errors.New("invalid output format")
+			}
+
+			reader, err := printer.Print(printer.DSRList(*resp), &printer.Options{
+				Format: printer.Format(output),
+				// TODO: query should be only used for JSON and YAML output formats
+				Query: viper.GetString("query"),
+			})
+			if err != nil {
+				return err
+			}
+
+			if _, err := io.Copy(os.Stdout, reader); err != nil {
+				return err
+			}
+
+			return nil
+		},
 	}
 
+	addPaginationFlags(cmd)
+	addQueryFlag(cmd)
+	addOutputFlag(cmd, "table")
+
 	return cmd
+}
+
+func NewCmdDomainDSRGet(opts *internal.CommandOptions) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show",
+		Short: "Retrieve a delegation signer record",
+		Example: heredoc.Doc(`
+			$ dnsimple dsr get --domain example.com --record-id 1
+			$ dnsimple dsr get --domain example.com --record-id 1 --sandbox
+		`),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SetupIO(cmd, opts)
+
+			cfg, err := config.New()
+			if err != nil {
+				return err
+			}
+
+			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			resp, err := apiClient.Domains.GetDelegationSignerRecord(
+				context.Background(),
+				cfg.Account,
+				viper.GetString("domain"),
+				viper.GetInt64("record-id"),
+			)
+			if err != nil {
+				return err
+			}
+
+			output := viper.GetString("output")
+			if output != formatText && output != formatJSON && output != formatYAML {
+				return errors.New("invalid output format")
+			}
+
+			printData, err := printer.Print(printer.DSRItem(*resp), &printer.Options{
+				Format: printer.Format(output),
+				// TODO: query should be only used for JSON and YAML output formats
+				Query: viper.GetString("query"),
+			})
+			if err != nil {
+				return err
+			}
+
+			if _, err := io.Copy(cmd.OutOrStdout(), printData); err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+
+	addRecordIDFlag(cmd)
+	addQueryFlag(cmd)
+	addOutputFlag(cmd, "text")
+
+	return cmd
+}
+
+func addRecordIDFlag(cmd *cobra.Command) {
+	cmd.Flags().String("record-id", "", "Record id")
+	if err := cmd.MarkFlagRequired("record-id"); err != nil {
+		panic(err)
+	}
 }
