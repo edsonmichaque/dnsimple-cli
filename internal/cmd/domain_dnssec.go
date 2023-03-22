@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdDomainDNSSec(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDNSSec(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "dnssec",
 		Short: "Manage DNSSEC status",
@@ -41,7 +41,7 @@ func NewCmdDomainDNSSec(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDNSSECStatus(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDNSSECStatus(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Retrieve DNSSEC status",
@@ -86,7 +86,7 @@ func NewCmdDNSSECStatus(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDNSSECDisable(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDNSSECDisable(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "disable",
 		Short: "Disable DNSSEC",
@@ -126,7 +126,7 @@ func NewCmdDNSSECDisable(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDNSSECEnable(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDNSSECEnable(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enable",
 		Short: "Enable DNSSEC",

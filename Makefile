@@ -1,3 +1,6 @@
+COPYRIGHT_HOLDER := "Edson Michaque"
+COPYRIGHT_YEARS := "2023"
+
 .PHONY: build
 build:
 	go build -o ./bin/dnsimple cmd/dnsimple/main.go
@@ -24,7 +27,7 @@ addlicense:
 
 .PHONY: copyright
 copyright: addlicense
-	addlicense -c 'Edson Michaque' -y 2023 -l apache -s  .
+	addlicense -c ${COPYRIGHT_HOLDER} -y ${COPYRIGHT_YEARS} -l apache -s  .
 
 .PHONY: check-license
 check-license: addlicense

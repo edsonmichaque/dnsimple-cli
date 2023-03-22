@@ -32,18 +32,22 @@ var (
 )
 
 const (
+	formatJSON              = "json"
+	formatYAML              = "yaml"
+	formatTable             = "table"
+	formatText              = "text"
 	flagAccount             = "account"
 	flagAccessToken         = "access-token"
 	flagBaseURL             = "base-url"
 	flagSandbox             = "sandbox"
 	flagProfile             = "profile"
-	flagConfig              = "config-file"
+	flagConfigFile          = "config-file"
 	envPrefix               = "DNSIMPLE"
 	defaultProfile          = "default"
 	defaultConfigFileFormat = "yaml"
 )
 
-func NewCmdRoot(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdRoot(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "dnsimple",
 		SilenceUsage: true,
@@ -61,7 +65,7 @@ func NewCmdRoot(opts *internal.CommandOptions) *cobra.Command {
 	cmd.PersistentFlags().String(flagBaseURL, "", "Base URL")
 	cmd.PersistentFlags().String(flagAccessToken, "", "Access token")
 	cmd.PersistentFlags().Bool(flagSandbox, false, "Sandbox environment")
-	cmd.PersistentFlags().StringVarP(&configFile, flagConfig, "c", "", "Configuration file")
+	cmd.PersistentFlags().StringVarP(&configFile, flagConfigFile, "c", "", "Configuration file")
 	cmd.PersistentFlags().StringVar(&profile, flagProfile, "default", "Profile")
 
 	cmd.MarkFlagsMutuallyExclusive(flagBaseURL, flagSandbox)
@@ -77,24 +81,32 @@ func NewCmdRoot(opts *internal.CommandOptions) *cobra.Command {
 func lookupConfigFiles() {
 	var err error
 
+	const (
+		envDNSimpleConfigFile = "DNSIMPLE_CONFIG_FILE"
+		envXDGConfigHome      = "XDG_CONFIG_HOME"
+		envDNSimpleProfile    = "DNSIMPLE_PROFILE"
+		pathConfigFile        = "/etc/dnsimple"
+		pathDNSimple          = "dnsimple"
+	)
+
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
-	} else if configFile := os.Getenv("DNSIMPLE_CONFIG_FILE"); configFile != "" {
+	} else if configFile := os.Getenv(envDNSimpleConfigFile); configFile != "" {
 		viper.SetConfigFile(configFile)
 	} else {
-		configHome := os.Getenv("XDG_CONFIG_HOME")
+		configHome := os.Getenv(envXDGConfigHome)
 		if configHome == "" {
 			configHome, err = os.UserConfigDir()
 			cobra.CheckErr(err)
 		}
 
-		viper.AddConfigPath(filepath.Join(configHome, "dnsimple"))
-		viper.AddConfigPath("/etc/dnsimple")
+		viper.AddConfigPath(filepath.Join(configHome, pathDNSimple))
+		viper.AddConfigPath(pathConfigFile)
 		viper.SetConfigType(defaultConfigFileFormat)
 
 		if profile != "" {
 			viper.SetConfigName(profile)
-		} else if configProfile := os.Getenv("DNSIMPLE_PROFILE"); configProfile != "" {
+		} else if configProfile := os.Getenv(envDNSimpleProfile); configProfile != "" {
 			viper.SetConfigName(configProfile)
 		} else {
 			viper.SetConfigName(defaultProfile)

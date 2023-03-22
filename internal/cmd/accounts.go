@@ -29,7 +29,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdAccounts(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdAccounts(opts *internal.CmdOpts) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
@@ -56,15 +56,15 @@ func NewCmdAccounts(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			output := v.GetString("output")
+			output := v.GetString(flagOutput)
 			if output != "table" && output != "json" && output != "yaml" {
 				return errors.New("invalid output format")
 			}
 
 			formattedOutput, err := formatter.Format(formatter.AccountList(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: v.GetString("query"),
+				Query: v.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
@@ -89,9 +89,9 @@ func NewCmdAccounts(opts *internal.CommandOptions) *cobra.Command {
 }
 
 func addOutputFlag(cmd *cobra.Command, format string) {
-	cmd.Flags().StringP("output", "o", format, "Output format")
+	cmd.Flags().StringP(flagOutput, "o", format, "Output format")
 }
 
 func addQueryFlag(cmd *cobra.Command) {
-	cmd.Flags().StringP("query", "q", "", "Query")
+	cmd.Flags().StringP(flagQuery, "q", "", "Query")
 }

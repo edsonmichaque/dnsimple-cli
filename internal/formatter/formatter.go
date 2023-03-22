@@ -39,8 +39,8 @@ const (
 )
 
 type Options struct {
-	OutputFormat OutputFormat
-	Query        string
+	Format OutputFormat
+	Query  string
 }
 
 type YAML interface {
@@ -60,7 +60,7 @@ type Text interface {
 }
 
 func Format(data interface{}, opts *Options) (io.Reader, error) {
-	if opts.OutputFormat == OutputFormatJSON {
+	if opts.Format == OutputFormatJSON {
 		if formatter, ok := data.(JSON); ok {
 			return formatter.FormatJSON(opts)
 		}
@@ -68,7 +68,7 @@ func Format(data interface{}, opts *Options) (io.Reader, error) {
 		return nil, errors.New("json formatter is not implemented")
 	}
 
-	if opts.OutputFormat == OutputFormatYAML {
+	if opts.Format == OutputFormatYAML {
 		if formatter, ok := data.(YAML); ok {
 			return formatter.FormatYAML(opts)
 		}
@@ -76,7 +76,7 @@ func Format(data interface{}, opts *Options) (io.Reader, error) {
 		return nil, errors.New("yaml formatter is not implemented")
 	}
 
-	if opts.OutputFormat == OutputFormatTable {
+	if opts.Format == OutputFormatTable {
 		if formatter, ok := data.(Table); ok {
 			return formatter.FormatTable(opts)
 		}
@@ -84,7 +84,7 @@ func Format(data interface{}, opts *Options) (io.Reader, error) {
 		return nil, errors.New("table formatter is not implemented")
 	}
 
-	if opts.OutputFormat == OutputFormatText {
+	if opts.Format == OutputFormatText {
 		if formatter, ok := data.(Text); ok {
 			return formatter.FormatText(opts)
 		}

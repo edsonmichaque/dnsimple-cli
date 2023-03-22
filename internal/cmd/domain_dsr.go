@@ -33,7 +33,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdDomainDSR(opts *internal.CommandOptions) *cobra.Command {
+const flagRecordID = "record-id"
+
+func NewCmdDomainDSR(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "dsr",
 		Short: "Manage domain signed records",
@@ -49,7 +51,7 @@ func NewCmdDomainDSR(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDSRCreate(opts *internal.CmdOpts) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
@@ -134,7 +136,7 @@ func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainDSRList(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDSRList(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List delegation signer records",
@@ -167,9 +169,9 @@ func NewCmdDomainDSRList(opts *internal.CommandOptions) *cobra.Command {
 			}
 
 			reader, err := formatter.Format(formatter.DSRList(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: viper.GetString("query"),
+				Query: viper.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
@@ -190,7 +192,7 @@ func NewCmdDomainDSRList(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainDSRGet(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDSRGet(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a delegation signer record",
@@ -216,8 +218,8 @@ func NewCmdDomainDSRGet(opts *internal.CommandOptions) *cobra.Command {
 			resp, err := apiClient.Domains.GetDelegationSignerRecord(
 				context.Background(),
 				cfg.Account,
-				viper.GetString("domain"),
-				viper.GetInt64("record-id"),
+				viper.GetString(flagDomain),
+				viper.GetInt64(flagRecordID),
 			)
 			if err != nil {
 				return err
@@ -229,9 +231,9 @@ func NewCmdDomainDSRGet(opts *internal.CommandOptions) *cobra.Command {
 			}
 
 			formattedOutput, err := formatter.Format(formatter.DSRItem(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: viper.GetString("query"),
+				Query: viper.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
@@ -253,7 +255,7 @@ func NewCmdDomainDSRGet(opts *internal.CommandOptions) *cobra.Command {
 }
 
 func addRecordIDFlag(cmd *cobra.Command) {
-	cmd.Flags().String("record-id", "", "Record id")
+	cmd.Flags().String(flagRecordID, "", "Record id")
 	if err := cmd.MarkFlagRequired("record-id"); err != nil {
 		panic(err)
 	}

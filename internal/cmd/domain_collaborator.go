@@ -34,7 +34,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
+var (
+	flagDomain         = "domain"
+	flagFromFile       = "from-file"
+	flagCollaboratorID = "collaborator-id"
+	flagOutput         = "output"
+	flagQuery          = "query"
+)
+
+func NewCmdDomainCollaborator(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "collaborator",
 		Args: cobra.NoArgs,
@@ -53,7 +61,7 @@ func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdCollaboratorAdd(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add --domain [DOMAIN]",
 		Short: "Add collaborator",
@@ -77,8 +85,8 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 			}
 
 			var (
-				domain   = viper.GetString("domain")
-				fromFile = viper.GetString("from-file")
+				domain   = viper.GetString(flagDomain)
+				fromFile = viper.GetString(flagFromFile)
 			)
 
 			var rawBody []byte
@@ -137,7 +145,7 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdCollaboratorRemove(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdCollaboratorRemove(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove --domain [DOMAIN]",
 		Short: "Remove collaborator",
@@ -158,7 +166,7 @@ func NewCmdCollaboratorRemove(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString("domain")
+			domain := viper.GetString(flagDomain)
 
 			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
 
@@ -166,13 +174,13 @@ func NewCmdCollaboratorRemove(opts *internal.CommandOptions) *cobra.Command {
 				context.Background(),
 				cfg.Account,
 				domain,
-				viper.GetInt64("collaborator-id"),
+				viper.GetInt64(flagCollaboratorID),
 			)
 			if err != nil {
 				return err
 			}
 
-			cmd.Printf("✓ Deleted collaborator %v", viper.GetInt64("collaborator-id"))
+			cmd.Printf("✓ Deleted collaborator %v", viper.GetInt64(flagCollaboratorID))
 
 			return nil
 		},
@@ -191,7 +199,7 @@ func addCollaboratorIDFlag(cmd *cobra.Command) {
 	}
 }
 
-func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdCollaboratorList(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "list --domain [DOMAIN]",
 		Example: heredoc.Doc(`
@@ -213,7 +221,7 @@ func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString("domain")
+			domain := viper.GetString(flagDomain)
 
 			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
 
@@ -222,15 +230,15 @@ func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			output := viper.GetString("output")
+			output := viper.GetString(flagOutput)
 			if output != formatTable && output != formatJSON && output != formatYAML {
 				return errors.New("invalid output format")
 			}
 
 			reader, err := formatter.Format(formatter.CollaboratorList(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: viper.GetString("query"),
+				Query: viper.GetString(flagQuery),
 			})
 			if err != nil {
 				return err

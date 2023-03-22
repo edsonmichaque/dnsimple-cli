@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -34,14 +33,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	formatJSON  = "json"
-	formatYAML  = "yaml"
-	formatTable = "table"
-	formatText  = "text"
-)
-
-func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomain(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "domain",
 		Short:   "Manage domains",
@@ -60,7 +52,7 @@ func NewCmdDomain(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainList(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List domains",
@@ -97,9 +89,9 @@ func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 			}
 
 			formattedOutput, err := formatter.Format(formatter.DomainList(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: viper.GetString("query"),
+				Query: viper.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
@@ -120,7 +112,7 @@ func NewCmdDomainList(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainDelete(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDelete(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a domain",
@@ -179,7 +171,7 @@ func NewCmdDomainDelete(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainCreate(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainCreate(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a domain",
@@ -235,7 +227,7 @@ func NewCmdDomainCreate(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainGet(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainGet(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a domain",
@@ -273,7 +265,7 @@ func NewCmdDomainGet(opts *internal.CommandOptions) *cobra.Command {
 			}
 
 			formattedOutput, err := formatter.Format(formatter.DomainItem(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: viper.GetString("query"),
 			})
@@ -300,19 +292,6 @@ func addDomainFlag(cmd *cobra.Command) {
 	if err := cmd.MarkFlagRequired("domain"); err != nil {
 		panic(err)
 	}
-}
-
-func runConfirm(domain string) bool {
-	confirm := false
-	prompt := &survey.Confirm{
-		Message: fmt.Sprintf("Do you want to delete domain %s?", domain),
-	}
-
-	if err := survey.AskOne(prompt, &confirm); err != nil {
-		return false
-	}
-
-	return confirm
 }
 
 func addConfirmFlag(cmd *cobra.Command) {

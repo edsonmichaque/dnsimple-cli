@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdVersion(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdVersion(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Check identity",

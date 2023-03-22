@@ -23,28 +23,28 @@ import (
 )
 
 const (
-	Production = "https://api.dnsimple.com"
-	Sandbox    = "https://api.sandbox.dnsimple.com"
+	BaseURLProduction = "https://api.dnsimple.com"
+	BaseURLSandbox    = "https://api.sandbox.dnsimple.com"
 )
 
 func New() (*Config, error) {
 	return NewWithValidation(true)
 }
 
-func NewWithValidation(validation bool) (*Config, error) {
+func NewWithValidation(validate bool) (*Config, error) {
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
 
-	if validation {
+	if validate {
 		if err := cfg.Validate(); err != nil {
 			return nil, err
 		}
 	}
 
 	if cfg.Sandbox {
-		cfg.BaseURL = Sandbox
+		cfg.BaseURL = BaseURLSandbox
 	}
 
 	return &cfg, nil

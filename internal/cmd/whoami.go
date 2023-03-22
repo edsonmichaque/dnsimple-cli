@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdWhoami(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdWhoami(opts *internal.CmdOpts) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
@@ -48,15 +48,15 @@ func NewCmdWhoami(opts *internal.CommandOptions) *cobra.Command {
 				return err
 			}
 
-			output := v.GetString("output")
+			output := v.GetString(flagOutput)
 			if output != "text" && output != "json" && output != "yaml" {
 				return errors.New("invalid output format")
 			}
 
 			formattedOutput, err := formatter.Format(formatter.Whoami(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: v.GetString("query"),
+				Query: v.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
