@@ -89,9 +89,9 @@ func NewCmdDomainList(opts *internal.CmdOpts) *cobra.Command {
 			}
 
 			formattedOutput, err := formatter.Format(formatter.DomainList(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: viper.GetString("query"),
+				Query: viper.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
@@ -265,7 +265,7 @@ func NewCmdDomainGet(opts *internal.CmdOpts) *cobra.Command {
 			}
 
 			formattedOutput, err := formatter.Format(formatter.DomainItem(*resp), &formatter.Options{
-				OutputFormat: formatter.OutputFormat(output),
+				Format: formatter.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: viper.GetString("query"),
 			})
