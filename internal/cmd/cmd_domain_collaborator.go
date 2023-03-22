@@ -53,7 +53,7 @@ func CmdDomainCollaborator(opts *Options) *cobra.Command {
 }
 
 func CmdCollaboratorAdd(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "add --domain [DOMAIN]",
 		Short: "Add collaborator",
 		Args:  cobra.MaximumNArgs(1),
@@ -135,7 +135,7 @@ func CmdCollaboratorAdd(opts *Options) *cobra.Command {
 }
 
 func CmdCollaboratorRemove(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "remove --domain [DOMAIN]",
 		Short: "Remove collaborator",
 		Args:  cobra.NoArgs,
@@ -201,7 +201,7 @@ func applyOpts(cmd *cobra.Command, opts *Options) {
 }
 
 func CmdCollaboratorList(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use: "list --domain [DOMAIN]",
 		Example: heredoc.Doc(`
 			dnsimple collaborator list --domain example.com

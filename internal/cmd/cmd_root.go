@@ -67,7 +67,7 @@ func Run(opts *Options) error {
 }
 
 func CmdRoot(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:          binName,
 		SilenceUsage: true,
 	}, opts)
@@ -133,7 +133,7 @@ func initConfig() {
 	}
 }
 
-func createCommand(cmd *cobra.Command, opts *Options) *cobra.Command {
+func createCmd(cmd *cobra.Command, opts *Options) *cobra.Command {
 	applyOpts(cmd, opts)
 
 	return cmd
