@@ -78,16 +78,8 @@ func NewCmdRoot(opts *internal.CmdOpts) *cobra.Command {
 	return cmd
 }
 
-func lookupConfigFiles() {
+func initConfig() {
 	var err error
-
-	const (
-		envDNSimpleConfigFile = "DNSIMPLE_CONFIG_FILE"
-		envXDGConfigHome      = "XDG_CONFIG_HOME"
-		envDNSimpleProfile    = "DNSIMPLE_PROFILE"
-		pathConfigFile        = "/etc/dnsimple"
-		pathDNSimple          = "dnsimple"
-	)
 
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
