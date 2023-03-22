@@ -14,7 +14,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package internal
+package cmd
 
 import (
 	"context"
@@ -23,42 +23,47 @@ import (
 	"os"
 
 	"github.com/dnsimple/dnsimple-go/dnsimple"
-	"github.com/spf13/cobra"
 )
 
-func NewCommandOpts() *CmdOpts {
-	return &CmdOpts{
-		Stdin:  os.Stdin,
-		Stderr: os.Stderr,
-		Stdout: os.Stdout,
-		Client: buildClient,
+func NewOptions() (*Options, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
 	}
+
+	return &Options{
+		Stdin:         os.Stdin,
+		Stderr:        os.Stderr,
+		Stdout:        os.Stdout,
+		WorkDir:       wd,
+		ClientBuilder: buildClient,
+	}, nil
 }
 
-type CmdOpts struct {
-	Stdout io.Writer
-	Stdin  io.Reader
-	Stderr io.Writer
-
-	Client func(string, string) *dnsimple.Client
+type Options struct {
+	Stdout        io.Writer
+	Stdin         io.Reader
+	Stderr        io.Writer
+	WorkDir       string
+	ClientBuilder func(string, string) *dnsimple.Client
 }
 
-func (c CmdOpts) Validate() error {
-	if c.Client == nil {
+func (c Options) Validate() error {
+	if c.ClientBuilder == nil {
 		return errors.New("invalid client builder")
 	}
 
 	return nil
 }
 
-func (c CmdOpts) BuildClient(url, token string) *dnsimple.Client {
-	client := c.Client
+func (c Options) BuildClient(url, token string) *dnsimple.Client {
+	clientBuilder := c.ClientBuilder
 
-	if client == nil {
-		client = buildClient
+	if clientBuilder == nil {
+		clientBuilder = buildClient
 	}
 
-	return client(url, token)
+	return clientBuilder(url, token)
 }
 
 func buildClient(url, token string) *dnsimple.Client {
@@ -69,18 +74,4 @@ func buildClient(url, token string) *dnsimple.Client {
 	}
 
 	return client
-}
-
-func SetupIO(cmd *cobra.Command, opts *CmdOpts) {
-	if opts.Stdout != nil {
-		cmd.SetOut(opts.Stdout)
-	}
-
-	if opts.Stdin != nil {
-		cmd.SetIn(opts.Stdin)
-	}
-
-	if opts.Stderr != nil {
-		cmd.SetErr(opts.Stderr)
-	}
 }

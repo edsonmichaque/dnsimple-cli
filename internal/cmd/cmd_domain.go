@@ -25,7 +25,6 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/dnsimple/dnsimple-go/dnsimple"
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
 	"github.com/fatih/color"
@@ -33,27 +32,27 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdDomain(opts *internal.CmdOpts) *cobra.Command {
+func CmdDomain(opts *Options) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "domain",
 		Short:   "Manage domains",
 		Aliases: []string{"domains"},
 	}
 
-	cmd.AddCommand(NewCmdDomainList(opts))
-	cmd.AddCommand(NewCmdDomainDelete(opts))
-	cmd.AddCommand(NewCmdDomainCreate(opts))
-	cmd.AddCommand(NewCmdDomainGet(opts))
-	cmd.AddCommand(NewCmdDomainCollaborator(opts))
-	cmd.AddCommand(NewCmdDomainDSR(opts))
-	cmd.AddCommand(NewCmdDomainDNSSec(opts))
-	cmd.AddCommand(NewCmdDomainDSR(opts))
+	cmd.AddCommand(CmdDomainCollaborator(opts))
+	cmd.AddCommand(CmdDomainCreate(opts))
+	cmd.AddCommand(CmdDomainDNSSec(opts))
+	cmd.AddCommand(CmdDomainDSR(opts))
+	cmd.AddCommand(CmdDomainDSR(opts))
+	cmd.AddCommand(CmdDomainDelete(opts))
+	cmd.AddCommand(CmdDomainGet(opts))
+	cmd.AddCommand(CmdDomainList(opts))
 
 	return cmd
 }
 
-func NewCmdDomainList(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDomainList(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "list",
 		Short: "List domains",
 		Args:  cobra.NoArgs,
@@ -67,8 +66,6 @@ func NewCmdDomainList(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -103,17 +100,17 @@ func NewCmdDomainList(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
+	addOutputFlag(cmd, formatTable)
 	addPaginationFlags(cmd)
 	addQueryFlag(cmd)
-	addOutputFlag(cmd, formatTable)
 
 	return cmd
 }
 
-func NewCmdDomainDelete(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDomainDelete(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "delete",
 		Short: "Delete a domain",
 		Args:  cobra.NoArgs,
@@ -127,12 +124,10 @@ func NewCmdDomainDelete(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
-			confirm := viper.GetBool("confirm")
+			confirm := viper.GetBool(flagConfirm)
 
 			if !confirm {
-				if !runConfirm(viper.GetString("domain")) {
+				if !runConfirm(viper.GetString(flagDomain)) {
 					return errors.New("no confirmation")
 				}
 			}
@@ -142,7 +137,7 @@ func NewCmdDomainDelete(opts *internal.CmdOpts) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString("domain")
+			domain := viper.GetString(flagDomain)
 
 			if domain == "" {
 				domain, err = runPromptDomainName()
@@ -163,7 +158,7 @@ func NewCmdDomainDelete(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addDomainFlag(cmd)
 	addConfirmFlag(cmd)
@@ -171,8 +166,8 @@ func NewCmdDomainDelete(opts *internal.CmdOpts) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainCreate(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDomainCreate(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "create",
 		Short: "Create a domain",
 		Example: heredoc.Doc(`
@@ -186,8 +181,6 @@ func NewCmdDomainCreate(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -222,13 +215,13 @@ func NewCmdDomainCreate(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	return cmd
 }
 
-func NewCmdDomainGet(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDomainGet(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a domain",
 		Args:  cobra.NoArgs,
@@ -242,8 +235,6 @@ func NewCmdDomainGet(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -279,7 +270,7 @@ func NewCmdDomainGet(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addQueryFlag(cmd)
 	addOutputFlag(cmd, formatText)

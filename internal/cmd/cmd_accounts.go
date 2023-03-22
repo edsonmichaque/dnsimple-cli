@@ -22,14 +22,13 @@ import (
 	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-func NewCmdAccounts(opts *internal.CmdOpts) *cobra.Command {
+func CmdAccounts(opts *Options) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
@@ -42,8 +41,6 @@ func NewCmdAccounts(opts *internal.CmdOpts) *cobra.Command {
 			dnsimple accounts --output=json --query="[].id"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				// TODO: pretty print error

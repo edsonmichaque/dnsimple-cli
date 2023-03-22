@@ -21,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -32,51 +31,61 @@ var (
 )
 
 const (
-	envDNSimpleConfigFile   = "DNSIMPLE_CONFIG_FILE"
-	envXDGConfigHome        = "XDG_CONFIG_HOME"
-	envDNSimpleProfile      = "DNSIMPLE_PROFILE"
-	pathConfigFile          = "/etc/dnsimple"
-	pathDNSimple            = "dnsimple"
-	formatJSON              = "json"
-	formatYAML              = "yaml"
-	formatTable             = "table"
-	formatText              = "text"
-	flagAccount             = "account"
-	flagAccessToken         = "access-token"
-	flagBaseURL             = "base-url"
-	flagSandbox             = "sandbox"
-	flagProfile             = "profile"
-	flagConfigFile          = "config-file"
-	envPrefix               = "DNSIMPLE"
-	defaultProfile          = "default"
+	binName                 = "dnsimple"
 	defaultConfigFileFormat = "yaml"
+	defaultProfile          = "default"
+	envDNSimpleConfigFile   = "DNSIMPLE_CONFIG_FILE"
+	envDNSimpleProfile      = "DNSIMPLE_PROFILE"
+	envDev                  = "DEV"
+	envPrefix               = "DNSIMPLE"
+	envProd                 = "PROD"
+	envSandbox              = "SANDBOX"
+	envXDGConfigHome        = "XDG_CONFIG_HOME"
+	flagAccessToken         = "access-token"
+	flagAccount             = "account"
+	flagBaseURL             = "base-url"
+	flagCollaboratorID      = "collaborator-id"
+	flagConfigFile          = "config-file"
+	flagConfirm             = "confirm"
 	flagDomain              = "domain"
 	flagFromFile            = "from-file"
-	flagCollaboratorID      = "collaborator-id"
 	flagOutput              = "output"
+	flagProfile             = "profile"
 	flagQuery               = "query"
+	flagRecordID            = "record-id"
+	flagSandbox             = "sandbox"
+	formatJSON              = "json"
+	formatTable             = "table"
+	formatText              = "text"
+	formatYAML              = "yaml"
+	pathConfigFile          = "/etc/dnsimple"
+	pathDNSimple            = "dnsimple"
 )
 
-func NewCmdRoot(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:          "dnsimple",
-		SilenceUsage: true,
-	}
+func Run(opts *Options) error {
+	return CmdRoot(opts).Execute()
+}
 
-	cmd.AddCommand(NewCmdAccounts(opts))
-	cmd.AddCommand(NewCmdConfig(opts))
-	cmd.AddCommand(NewCmdWhoami(opts))
-	cmd.AddCommand(NewCmdDomain(opts))
-	cmd.AddCommand(NewCmdVersion(opts))
+func CmdRoot(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
+		Use:          binName,
+		SilenceUsage: true,
+	}, opts)
+
+	cmd.AddCommand(CmdAccounts(opts))
+	cmd.AddCommand(CmdConfig(opts))
+	cmd.AddCommand(CmdDomain(opts))
+	cmd.AddCommand(CmdVersion(opts))
+	cmd.AddCommand(CmdWhoami(opts))
 
 	cobra.OnInitialize(initConfig)
 
+	cmd.PersistentFlags().Bool(flagSandbox, false, "Sandbox environment")
+	cmd.PersistentFlags().String(flagAccessToken, "", "Access token")
 	cmd.PersistentFlags().String(flagAccount, "", "Account")
 	cmd.PersistentFlags().String(flagBaseURL, "", "Base URL")
-	cmd.PersistentFlags().String(flagAccessToken, "", "Access token")
-	cmd.PersistentFlags().Bool(flagSandbox, false, "Sandbox environment")
-	cmd.PersistentFlags().StringVarP(&configFile, flagConfigFile, "c", "", "Configuration file")
 	cmd.PersistentFlags().StringVar(&profile, flagProfile, defaultProfile, "Profile")
+	cmd.PersistentFlags().StringVarP(&configFile, flagConfigFile, "c", "", "Configuration file")
 
 	cmd.MarkFlagsMutuallyExclusive(flagBaseURL, flagSandbox)
 
@@ -122,4 +131,10 @@ func initConfig() {
 			fmt.Println("Found error: ", err.Error())
 		}
 	}
+}
+
+func createCommand(cmd *cobra.Command, opts *Options) *cobra.Command {
+	applyOpts(cmd, opts)
+
+	return cmd
 }

@@ -24,8 +24,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,7 +47,7 @@ var (
 		"sandbox":      {},
 	}
 
-	configPropValidate = map[string]func(string) (interface{}, error){
+	validateConfig = map[string]func(string) (interface{}, error){
 		"sandbox": func(value string) (interface{}, error) {
 			return strconv.ParseBool(value)
 		},
@@ -65,14 +63,12 @@ var (
 	}
 )
 
-func NewCmdConfig(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdConfig(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "config",
 		Short: "Manage configurations",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.NewWithValidation(false)
 			if err != nil {
 				return err
@@ -83,7 +79,7 @@ func NewCmdConfig(opts *internal.CmdOpts) *cobra.Command {
 				return err
 			}
 
-			profile := viper.GetString("profile")
+			profile := viper.GetString(flagProfile)
 
 			cmd.Println(fmt.Sprintf("Configuring profile '%s'", profile))
 			cfg, ext, err := promptConfig(cfg)
@@ -102,23 +98,23 @@ func NewCmdConfig(opts *internal.CmdOpts) *cobra.Command {
 				v.Set(flagSandbox, cfg.Sandbox)
 			}
 
-			cfgPath := filepath.Join(home, "dnsimple", fmt.Sprintf("%s.%s", profile, strings.ToLower(ext)))
+			cfgPath := filepath.Join(home, pathDNSimple, fmt.Sprintf("%s.%s", profile, strings.ToLower(ext)))
 			if err := v.WriteConfigAs(cfgPath); err != nil {
 				return err
 			}
 
 			return nil
 		},
-	}
+	}, opts)
 
-	cmd.AddCommand(NewCmdConfigGet(opts))
-	cmd.AddCommand(NewCmdConfigSet(opts))
+	cmd.AddCommand(CmdConfigGet(opts))
+	cmd.AddCommand(CmdConfigSet(opts))
 
 	return cmd
 }
 
-func NewCmdConfigGet(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdConfigGet(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "get",
 		Short: "Manage configurations",
 		Args:  cobra.ExactArgs(1),
@@ -131,13 +127,13 @@ func NewCmdConfigGet(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	return cmd
 }
 
-func NewCmdConfigSet(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdConfigSet(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "set",
 		Short: "Manage configurations",
 		Args:  cobra.ExactArgs(2),
@@ -146,7 +142,7 @@ func NewCmdConfigSet(opts *internal.CmdOpts) *cobra.Command {
 				return errors.New("not found")
 			}
 
-			validate := configPropValidate[args[0]]
+			validate := validateConfig[args[0]]
 			if validate == nil {
 				return errors.New("no validator found")
 			}
@@ -164,159 +160,7 @@ func NewCmdConfigSet(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	return cmd
-}
-
-const (
-	envDev     = "DEV"
-	envSandbox = "SANDBOX"
-	envProd    = "PROD"
-)
-
-func promptConfig(c *config.Config) (*config.Config, string, error) {
-	baseURL := prodBaseURL
-
-	accountID, err := promptAccountID(c.Account)
-	if err != nil {
-		return nil, "", err
-	}
-
-	accessToken, err := promptAccessToken(c.AccessToken)
-	if err != nil {
-		return nil, "", err
-	}
-
-	env, err := promptEnvironment(envProd)
-	if err != nil {
-		return nil, "", err
-	}
-
-	if env == envSandbox {
-		baseURL = sandboxBaseURL
-	}
-
-	if env == envDev {
-		baseURL, err = promptBaseURL(prodBaseURL)
-		if err != nil {
-			return nil, "", err
-		}
-	}
-
-	fileFormat, err := promptFileFormat(configFormatJSON)
-	if err != nil {
-		return nil, "", err
-	}
-
-	confirmation, err := promptConfirmation("Do you want to save?", true)
-	if err != nil {
-		return nil, "", err
-	}
-
-	if !confirmation {
-		return nil, "", errors.New("did not confirm")
-	}
-
-	cfg := config.Config{
-		Account:     accountID,
-		AccessToken: accessToken,
-	}
-
-	if env == envDev {
-		cfg.BaseURL = baseURL
-	}
-
-	if env == envSandbox {
-		cfg.Sandbox = true
-	}
-
-	return &cfg, fileFormat, nil
-}
-
-func promptAccessToken(value string) (string, error) {
-	prompt := &survey.Input{
-		Message: "Access Token",
-		Default: value,
-	}
-
-	var token string
-	if err := survey.AskOne(prompt, &token); err != nil {
-		return "", err
-	}
-
-	return token, nil
-}
-
-func promptAccountID(value string) (string, error) {
-	prompt := &survey.Input{
-		Message: "Account ID",
-		Default: value,
-	}
-
-	var accountID string
-	if err := survey.AskOne(prompt, &accountID); err != nil {
-		return "", err
-	}
-
-	return accountID, nil
-}
-
-func promptEnvironment(value string) (string, error) {
-	prompt := &survey.Select{
-		Message: "Environment",
-		Options: []string{envProd, envSandbox, envDev},
-		Default: value,
-	}
-
-	var env string
-	if err := survey.AskOne(prompt, &env); err != nil {
-		return "", err
-	}
-
-	return env, nil
-}
-
-func promptBaseURL(value string) (string, error) {
-	prompt := &survey.Input{
-		Message: "Base URL",
-		Default: value,
-	}
-
-	var baseURL string
-	if err := survey.AskOne(prompt, &baseURL); err != nil {
-		return "", err
-	}
-
-	return baseURL, nil
-}
-
-func promptFileFormat(value string) (string, error) {
-	prompt := &survey.Select{
-		Message: "File format",
-		Options: []string{configFormatJSON, configFormatYAML, configFormatTOML},
-		Default: value,
-	}
-
-	var fileFormat string
-	if err := survey.AskOne(prompt, &fileFormat); err != nil {
-		return "", err
-	}
-
-	return fileFormat, nil
-}
-
-func promptConfirmation(msg string, value bool) (bool, error) {
-	var confirmation bool
-
-	prompt := &survey.Confirm{
-		Message: msg,
-		Default: value,
-	}
-
-	if err := survey.AskOne(prompt, &confirmation); err != nil {
-		return false, err
-	}
-
-	return confirmation, nil
 }
