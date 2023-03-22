@@ -29,9 +29,7 @@ import (
 )
 
 func CmdAccounts(opts *Options) *cobra.Command {
-	v := viper.New()
-
-	cmd := &cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "accounts",
 		Short: "List accounts",
 		Example: heredoc.Doc(`
@@ -40,6 +38,11 @@ func CmdAccounts(opts *Options) *cobra.Command {
 			dnsimple accounts --output=yaml
 			dnsimple accounts --output=json --query="[].id"
 		`),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.New()
 			if err != nil {
@@ -53,7 +56,7 @@ func CmdAccounts(opts *Options) *cobra.Command {
 				return err
 			}
 
-			output := v.GetString(flagOutput)
+			output := viper.GetString(flagOutput)
 			if output != "table" && output != "json" && output != "yaml" {
 				return errors.New("invalid output format")
 			}
@@ -61,7 +64,7 @@ func CmdAccounts(opts *Options) *cobra.Command {
 			formattedOutput, err := format.Format(format.AccountList(*resp), &format.Options{
 				Format: format.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: v.GetString(flagQuery),
+				Query: viper.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
@@ -73,14 +76,10 @@ func CmdAccounts(opts *Options) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addOutputFlag(cmd, "table")
 	addQueryFlag(cmd)
-
-	if err := v.BindPFlags(cmd.Flags()); err != nil {
-		panic(err)
-	}
 
 	return cmd
 }

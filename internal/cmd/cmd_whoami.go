@@ -28,8 +28,6 @@ import (
 )
 
 func CmdWhoami(opts *Options) *cobra.Command {
-	v := viper.New()
-
 	cmd := createCmd(&cobra.Command{
 		Use:   "whoami",
 		Short: "Check identity",
@@ -45,7 +43,7 @@ func CmdWhoami(opts *Options) *cobra.Command {
 				return err
 			}
 
-			output := v.GetString(flagOutput)
+			output := viper.GetString(flagOutput)
 			if output != "text" && output != "json" && output != "yaml" {
 				return errors.New("invalid output format")
 			}
@@ -53,7 +51,7 @@ func CmdWhoami(opts *Options) *cobra.Command {
 			formattedOutput, err := format.Format(format.Whoami(*resp), &format.Options{
 				Format: format.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: v.GetString(flagQuery),
+				Query: viper.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
@@ -70,7 +68,7 @@ func CmdWhoami(opts *Options) *cobra.Command {
 	addOutputFlag(cmd, formatText)
 	addQueryFlag(cmd)
 
-	if err := v.BindPFlags(cmd.Flags()); err != nil {
+	if err := viper.BindPFlags(cmd.Flags()); err != nil {
 		panic(err)
 	}
 
