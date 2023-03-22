@@ -19,14 +19,16 @@ package main
 import (
 	"os"
 
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/cmd"
 )
 
 func main() {
-	if err := cmd.NewCmdRoot(
-		internal.NewCommandOpts(),
-	).Execute(); err != nil {
+	opts, err := cmd.NewOptions()
+	if err != nil {
+		panic(err)
+	}
+
+	if err := cmd.Run(opts); err != nil {
 		os.Exit(1)
 	}
 }

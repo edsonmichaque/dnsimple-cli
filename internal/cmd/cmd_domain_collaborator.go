@@ -34,7 +34,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdDomainCollaborator(opts *internal.CmdOpts) *cobra.Command {
+func CmdDomainCollaborator(opts *Options) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "collaborator",
 		Args: cobra.NoArgs,
@@ -44,17 +44,17 @@ func NewCmdDomainCollaborator(opts *internal.CmdOpts) *cobra.Command {
 		Short: "Manage collaborators",
 	}
 
-	cmd.AddCommand(NewCmdCollaboratorAdd(opts))
-	cmd.AddCommand(NewCmdCollaboratorList(opts))
-	cmd.AddCommand(NewCmdCollaboratorRemove(opts))
+	cmd.AddCommand(CmdCollaboratorAdd(opts))
+	cmd.AddCommand(CmdCollaboratorList(opts))
+	cmd.AddCommand(CmdCollaboratorRemove(opts))
 
 	addDomainRequiredFlag(cmd)
 
 	return cmd
 }
 
-func NewCmdCollaboratorAdd(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdCollaboratorAdd(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "add --domain [DOMAIN]",
 		Short: "Add collaborator",
 		Args:  cobra.MaximumNArgs(1),
@@ -69,8 +69,6 @@ func NewCmdCollaboratorAdd(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -130,15 +128,15 @@ func NewCmdCollaboratorAdd(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addFromFileFlag(cmd)
 
 	return cmd
 }
 
-func NewCmdCollaboratorRemove(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdCollaboratorRemove(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "remove --domain [DOMAIN]",
 		Short: "Remove collaborator",
 		Args:  cobra.NoArgs,
@@ -151,8 +149,6 @@ func NewCmdCollaboratorRemove(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -176,7 +172,7 @@ func NewCmdCollaboratorRemove(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addDomainRequiredFlag(cmd)
 	addCollaboratorIDFlag(cmd)
@@ -191,8 +187,23 @@ func addCollaboratorIDFlag(cmd *cobra.Command) {
 	}
 }
 
-func NewCmdCollaboratorList(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func applyOpts(cmd *cobra.Command, opts *Options) {
+	if opts.Stdout != nil {
+		cmd.SetOut(opts.Stdout)
+	}
+
+	if opts.Stdin != nil {
+		cmd.SetIn(opts.Stdin)
+	}
+
+	if opts.Stderr != nil {
+		cmd.SetErr(opts.Stderr)
+	}
+
+}
+
+func CmdCollaboratorList(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use: "list --domain [DOMAIN]",
 		Example: heredoc.Doc(`
 			dnsimple collaborator list --domain example.com
@@ -206,8 +217,6 @@ func NewCmdCollaboratorList(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -242,7 +251,7 @@ func NewCmdCollaboratorList(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addQueryFlag(cmd)
 	addOutputFlag(cmd, formatTable)

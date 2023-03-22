@@ -28,16 +28,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdWhoami(opts *internal.CmdOpts) *cobra.Command {
+func CmdWhoami(opts *Options) *cobra.Command {
 	v := viper.New()
 
-	cmd := &cobra.Command{
+	cmd := createCommand(&cobra.Command{
 		Use:   "whoami",
 		Short: "Check identity",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -68,9 +66,9 @@ func NewCmdWhoami(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
-	addOutputFlag(cmd, "text")
+	addOutputFlag(cmd, formatText)
 	addQueryFlag(cmd)
 
 	if err := v.BindPFlags(cmd.Flags()); err != nil {

@@ -33,28 +33,24 @@ import (
 	"github.com/spf13/viper"
 )
 
-const flagRecordID = "record-id"
-
-func NewCmdDomainDSR(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDomainDSR(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "dsr",
 		Short: "Manage domain signed records",
 		Args:  cobra.NoArgs,
-	}
+	}, opts)
 
-	cmd.AddCommand(NewCmdDomainDSRCreate(opts))
-	cmd.AddCommand(NewCmdDomainDSRList(opts))
-	cmd.AddCommand(NewCmdDomainDSRGet(opts))
+	cmd.AddCommand(CmdDomainDSRCreate(opts))
+	cmd.AddCommand(CmdDomainDSRList(opts))
+	cmd.AddCommand(CmdDomainDSRGet(opts))
 
 	addDomainRequiredFlag(cmd)
 
 	return cmd
 }
 
-func NewCmdDomainDSRCreate(opts *internal.CmdOpts) *cobra.Command {
-	v := viper.New()
-
-	cmd := &cobra.Command{
+func CmdDomainDSRCreate(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "create",
 		Short: "Create a delegation signer record",
 		Args:  cobra.MaximumNArgs(1),
@@ -68,16 +64,14 @@ func NewCmdDomainDSRCreate(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
 			}
 
 			var (
-				domain   = viper.GetString("domain")
-				fromFile = v.GetString("from-file")
+				domain   = viper.GetString(flagDomain)
+				fromFile = viper.GetString(flagFromFile)
 			)
 
 			var rawBody []byte
@@ -129,15 +123,15 @@ func NewCmdDomainDSRCreate(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addFromFileFlag(cmd)
 
 	return cmd
 }
 
-func NewCmdDomainDSRList(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDomainDSRList(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "list",
 		Short: "List delegation signer records",
 		Args:  cobra.NoArgs,
@@ -147,14 +141,12 @@ func NewCmdDomainDSRList(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
 			}
 
-			domain := viper.GetString("domain")
+			domain := viper.GetString(flagDomain)
 
 			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
 
@@ -183,17 +175,17 @@ func NewCmdDomainDSRList(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addPaginationFlags(cmd)
 	addQueryFlag(cmd)
-	addOutputFlag(cmd, "table")
+	addOutputFlag(cmd, formatTable)
 
 	return cmd
 }
 
-func NewCmdDomainDSRGet(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDomainDSRGet(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a delegation signer record",
 		Args:  cobra.NoArgs,
@@ -207,8 +199,6 @@ func NewCmdDomainDSRGet(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -245,11 +235,11 @@ func NewCmdDomainDSRGet(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	addRecordIDFlag(cmd)
 	addQueryFlag(cmd)
-	addOutputFlag(cmd, "text")
+	addOutputFlag(cmd, formatText)
 
 	return cmd
 }

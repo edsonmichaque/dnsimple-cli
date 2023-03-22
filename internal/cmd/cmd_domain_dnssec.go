@@ -25,35 +25,35 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdDomainDNSSec(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDomainDNSSec(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "dnssec",
 		Short: "Manage DNSSEC status",
 		Args:  cobra.NoArgs,
-	}
+	}, opts)
 
-	cmd.AddCommand(NewCmdDNSSECStatus(opts))
-	cmd.AddCommand(NewCmdDNSSECDisable(opts))
-	cmd.AddCommand(NewCmdDNSSECEnable(opts))
+	cmd.AddCommand(CmdDNSSECStatus(opts))
+	cmd.AddCommand(CmdDNSSECDisable(opts))
+	cmd.AddCommand(CmdDNSSECEnable(opts))
 
 	addDomainRequiredFlag(cmd)
 
 	return cmd
 }
 
-func NewCmdDNSSECStatus(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDNSSECStatus(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "status",
 		Short: "Retrieve DNSSEC status",
 		Args:  cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
+			applyOpts(cmd, opts)
+
 			if err := viper.BindPFlags(cmd.Flags()); err != nil {
 				panic(err)
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -81,13 +81,13 @@ func NewCmdDNSSECStatus(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	return cmd
 }
 
-func NewCmdDNSSECDisable(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDNSSECDisable(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "disable",
 		Short: "Disable DNSSEC",
 		Args:  cobra.NoArgs,
@@ -97,7 +97,7 @@ func NewCmdDNSSECDisable(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
+			applyOpts(cmd, opts)
 
 			cfg, err := config.New()
 			if err != nil {
@@ -121,13 +121,13 @@ func NewCmdDNSSECDisable(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	return cmd
 }
 
-func NewCmdDNSSECEnable(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdDNSSECEnable(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "enable",
 		Short: "Enable DNSSEC",
 		Args:  cobra.NoArgs,
@@ -137,7 +137,7 @@ func NewCmdDNSSECEnable(opts *internal.CmdOpts) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
+			applyOpts(cmd, opts)
 
 			cfg, err := config.New()
 			if err != nil {
@@ -161,7 +161,7 @@ func NewCmdDNSSECEnable(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	return cmd
 }

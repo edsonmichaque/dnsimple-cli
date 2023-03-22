@@ -26,14 +26,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdVersion(opts *internal.CmdOpts) *cobra.Command {
-	cmd := &cobra.Command{
+func CmdVersion(opts *Options) *cobra.Command {
+	cmd := createCommand(&cobra.Command{
 		Use:   "version",
 		Short: "Check identity",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			internal.SetupIO(cmd, opts)
-
 			versionTemplate := heredoc.Doc(`
 				DNSimple CLI version:       %v
 				DNSimple Go Client version: %v
@@ -46,7 +44,7 @@ func NewCmdVersion(opts *internal.CmdOpts) *cobra.Command {
 
 			return nil
 		},
-	}
+	}, opts)
 
 	return cmd
 }
