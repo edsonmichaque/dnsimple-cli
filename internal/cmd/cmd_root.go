@@ -32,6 +32,10 @@ var (
 
 const (
 	binName                 = "dnsimple"
+	configAccessToken       = "access-token"
+	configAccount           = "account"
+	configBaseURL           = "base-url"
+	configSandbox           = "sandbox"
 	defaultConfigFileFormat = "yaml"
 	defaultProfile          = "default"
 	envDNSimpleConfigFile   = "DNSIMPLE_CONFIG_FILE"

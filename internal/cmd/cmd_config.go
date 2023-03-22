@@ -41,23 +41,23 @@ var (
 	sandboxBaseURL = "https://api.sandbox.dnsimple.com"
 
 	configProps = map[string]struct{}{
-		"account":      {},
-		"base-url":     {},
-		"access-token": {},
-		"sandbox":      {},
+		configAccount:     {},
+		configBaseURL:     {},
+		configAccessToken: {},
+		configSandbox:     {},
 	}
 
 	validateConfig = map[string]func(string) (interface{}, error){
-		"sandbox": func(value string) (interface{}, error) {
+		configSandbox: func(value string) (interface{}, error) {
 			return strconv.ParseBool(value)
 		},
-		"account": func(value string) (interface{}, error) {
+		configAccount: func(value string) (interface{}, error) {
 			return strconv.ParseInt(value, 10, 64)
 		},
-		"base-url": func(value string) (interface{}, error) {
+		configBaseURL: func(value string) (interface{}, error) {
 			return value, nil
 		},
-		"access-token": func(value string) (interface{}, error) {
+		configAccessToken: func(value string) (interface{}, error) {
 			return value, nil
 		},
 	}
