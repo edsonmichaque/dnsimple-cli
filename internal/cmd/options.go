@@ -37,7 +37,7 @@ func NewOptions() (*Options, error) {
 		Stdout:        os.Stdout,
 		WorkDir:       wd,
 		ClientBuilder: buildClient,
-	}
+	}, nil
 }
 
 type Options struct {
