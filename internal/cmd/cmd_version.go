@@ -26,7 +26,7 @@ import (
 )
 
 func CmdVersion(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "version",
 		Short: "Check identity",
 		Args:  cobra.NoArgs,

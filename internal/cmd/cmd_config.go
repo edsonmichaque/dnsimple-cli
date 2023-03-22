@@ -64,7 +64,7 @@ var (
 )
 
 func CmdConfig(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "config",
 		Short: "Manage configurations",
 		Args:  cobra.NoArgs,
@@ -114,7 +114,7 @@ func CmdConfig(opts *Options) *cobra.Command {
 }
 
 func CmdConfigGet(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "get",
 		Short: "Manage configurations",
 		Args:  cobra.ExactArgs(1),
@@ -133,7 +133,7 @@ func CmdConfigGet(opts *Options) *cobra.Command {
 }
 
 func CmdConfigSet(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "set",
 		Short: "Manage configurations",
 		Args:  cobra.ExactArgs(2),

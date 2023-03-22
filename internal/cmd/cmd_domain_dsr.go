@@ -33,7 +33,7 @@ import (
 )
 
 func CmdDomainDSR(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "dsr",
 		Short: "Manage domain signed records",
 		Args:  cobra.NoArgs,
@@ -49,7 +49,7 @@ func CmdDomainDSR(opts *Options) *cobra.Command {
 }
 
 func CmdDomainDSRCreate(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "create",
 		Short: "Create a delegation signer record",
 		Args:  cobra.MaximumNArgs(1),
@@ -130,7 +130,7 @@ func CmdDomainDSRCreate(opts *Options) *cobra.Command {
 }
 
 func CmdDomainDSRList(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "list",
 		Short: "List delegation signer records",
 		Args:  cobra.NoArgs,
@@ -184,7 +184,7 @@ func CmdDomainDSRList(opts *Options) *cobra.Command {
 }
 
 func CmdDomainDSRGet(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a delegation signer record",
 		Args:  cobra.NoArgs,

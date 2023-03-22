@@ -25,7 +25,7 @@ import (
 )
 
 func CmdDomainDNSSec(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "dnssec",
 		Short: "Manage DNSSEC status",
 		Args:  cobra.NoArgs,
@@ -41,7 +41,7 @@ func CmdDomainDNSSec(opts *Options) *cobra.Command {
 }
 
 func CmdDNSSECStatus(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "status",
 		Short: "Retrieve DNSSEC status",
 		Args:  cobra.NoArgs,
@@ -84,7 +84,7 @@ func CmdDNSSECStatus(opts *Options) *cobra.Command {
 }
 
 func CmdDNSSECDisable(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "disable",
 		Short: "Disable DNSSEC",
 		Args:  cobra.NoArgs,
@@ -122,7 +122,7 @@ func CmdDNSSECDisable(opts *Options) *cobra.Command {
 }
 
 func CmdDNSSECEnable(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "enable",
 		Short: "Enable DNSSEC",
 		Args:  cobra.NoArgs,

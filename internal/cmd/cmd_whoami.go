@@ -30,7 +30,7 @@ import (
 func CmdWhoami(opts *Options) *cobra.Command {
 	v := viper.New()
 
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "whoami",
 		Short: "Check identity",
 		Args:  cobra.NoArgs,

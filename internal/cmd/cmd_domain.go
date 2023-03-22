@@ -52,7 +52,7 @@ func CmdDomain(opts *Options) *cobra.Command {
 }
 
 func CmdDomainList(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "list",
 		Short: "List domains",
 		Args:  cobra.NoArgs,
@@ -110,7 +110,7 @@ func CmdDomainList(opts *Options) *cobra.Command {
 }
 
 func CmdDomainDelete(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "delete",
 		Short: "Delete a domain",
 		Args:  cobra.NoArgs,
@@ -167,7 +167,7 @@ func CmdDomainDelete(opts *Options) *cobra.Command {
 }
 
 func CmdDomainCreate(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "create",
 		Short: "Create a domain",
 		Example: heredoc.Doc(`
@@ -221,7 +221,7 @@ func CmdDomainCreate(opts *Options) *cobra.Command {
 }
 
 func CmdDomainGet(opts *Options) *cobra.Command {
-	cmd := createCommand(&cobra.Command{
+	cmd := createCmd(&cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a domain",
 		Args:  cobra.NoArgs,
