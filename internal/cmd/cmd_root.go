@@ -31,11 +31,14 @@ var (
 )
 
 const (
-	binName                 = "dnsimple"
+	binaryName              = "dnsimple"
 	configAccessToken       = "access-token"
 	configAccount           = "account"
 	configBaseURL           = "base-url"
-	configSandbox           = "sandbox"
+	configCollaboratorID    = "collaborator-id"
+	configConfigFile        = "config-file"
+	configConfirm           = "confirm"
+	configDomain            = "domain"
 	defaultConfigFileFormat = "yaml"
 	defaultProfile          = "default"
 	envDNSimpleConfigFile   = "DNSIMPLE_CONFIG_FILE"
@@ -45,14 +48,6 @@ const (
 	envProd                 = "PROD"
 	envSandbox              = "SANDBOX"
 	envXDGConfigHome        = "XDG_CONFIG_HOME"
-	flagAccessToken         = "access-token"
-	flagAccount             = "account"
-	flagBaseURL             = "base-url"
-	flagCollaboratorID      = "collaborator-id"
-	flagConfigFile          = "config-file"
-	flagConfirm             = "confirm"
-	flagDomain              = "domain"
-	flagFromFile            = "from-file"
 	flagOutput              = "output"
 	flagProfile             = "profile"
 	flagQuery               = "query"
@@ -62,6 +57,9 @@ const (
 	formatTable             = "table"
 	formatText              = "text"
 	formatYAML              = "yaml"
+	optPage                 = "page"
+	optPerPage              = "per-page"
+	optionFromFile          = "from-file"
 	pathConfigFile          = "/etc/dnsimple"
 	pathDNSimple            = "dnsimple"
 )
@@ -72,7 +70,7 @@ func Run(opts *Options) error {
 
 func CmdRoot(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
-		Use:          binName,
+		Use:          binaryName,
 		SilenceUsage: true,
 	}, opts)
 
@@ -85,13 +83,13 @@ func CmdRoot(opts *Options) *cobra.Command {
 	cobra.OnInitialize(initConfig)
 
 	cmd.PersistentFlags().Bool(flagSandbox, false, "Sandbox environment")
-	cmd.PersistentFlags().String(flagAccessToken, "", "Access token")
-	cmd.PersistentFlags().String(flagAccount, "", "Account")
-	cmd.PersistentFlags().String(flagBaseURL, "", "Base URL")
+	cmd.PersistentFlags().String(configAccessToken, "", "Access token")
+	cmd.PersistentFlags().String(configAccount, "", "Account")
+	cmd.PersistentFlags().String(configBaseURL, "", "Base URL")
 	cmd.PersistentFlags().StringVar(&profile, flagProfile, defaultProfile, "Profile")
-	cmd.PersistentFlags().StringVarP(&configFile, flagConfigFile, "c", "", "Configuration file")
+	cmd.PersistentFlags().StringVarP(&configFile, configConfigFile, "c", "", "Configuration file")
 
-	cmd.MarkFlagsMutuallyExclusive(flagBaseURL, flagSandbox)
+	cmd.MarkFlagsMutuallyExclusive(configBaseURL, flagSandbox)
 
 	viper.SetEnvPrefix(envPrefix)
 	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
@@ -119,12 +117,14 @@ func initConfig() {
 		viper.AddConfigPath(pathConfigFile)
 		viper.SetConfigType(defaultConfigFileFormat)
 
+		viper.SetConfigName(defaultProfile)
+
+		if profile := os.Getenv(envDNSimpleProfile); profile != "" {
+			viper.SetConfigName(profile)
+		}
+
 		if profile != "" {
 			viper.SetConfigName(profile)
-		} else if configProfile := os.Getenv(envDNSimpleProfile); configProfile != "" {
-			viper.SetConfigName(configProfile)
-		} else {
-			viper.SetConfigName(defaultProfile)
 		}
 	}
 

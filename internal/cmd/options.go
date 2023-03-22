@@ -56,7 +56,7 @@ func (c Options) Validate() error {
 	return nil
 }
 
-func (c Options) BuildClient(url, token string) *dnsimple.Client {
+func (c Options) createClient(url, token string) *dnsimple.Client {
 	clientBuilder := c.ClientBuilder
 
 	if clientBuilder == nil {

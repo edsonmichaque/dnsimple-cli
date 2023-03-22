@@ -39,7 +39,14 @@ func CmdVersion(opts *Options) *cobra.Command {
 				OS/Arch (client):           %v/%v
 			`)
 
-			cmd.Printf(versionTemplate, build.Version, dnsimple.Version, prodBaseURL, "v2", runtime.GOOS, runtime.GOARCH)
+			cmd.Printf(
+				versionTemplate,
+				build.Version,
+				dnsimple.Version,
+				prodBaseURL, "v2",
+				runtime.GOOS,
+				runtime.GOARCH,
+			)
 
 			return nil
 		},

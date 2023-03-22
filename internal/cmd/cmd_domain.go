@@ -53,7 +53,7 @@ func CmdDomain(opts *Options) *cobra.Command {
 
 func CmdDomainList(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
-		Use:   "list",
+		Use:   actionList,
 		Short: "List domains",
 		Args:  cobra.NoArgs,
 		Example: heredoc.Doc(`
@@ -71,7 +71,7 @@ func CmdDomainList(opts *Options) *cobra.Command {
 				return err
 			}
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			resp, err := apiClient.Domains.ListDomains(context.Background(), cfg.Account, &dnsimple.DomainListOptions{
 				ListOptions: getListOptions(),
@@ -80,7 +80,7 @@ func CmdDomainList(opts *Options) *cobra.Command {
 				return err
 			}
 
-			output := viper.GetString("output")
+			output := viper.GetString(flagOutput)
 			if output != formatTable && output != formatJSON && output != formatYAML {
 				return errors.New("invalid output format" + output)
 			}
@@ -124,10 +124,10 @@ func CmdDomainDelete(opts *Options) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			confirm := viper.GetBool(flagConfirm)
+			confirm := viper.GetBool(configConfirm)
 
 			if !confirm {
-				if !runConfirm(viper.GetString(flagDomain)) {
+				if !runConfirm(viper.GetString(configDomain)) {
 					return errors.New("no confirmation")
 				}
 			}
@@ -137,7 +137,7 @@ func CmdDomainDelete(opts *Options) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString(flagDomain)
+			domain := viper.GetString(configDomain)
 
 			if domain == "" {
 				domain, err = runPromptDomainName()
@@ -146,7 +146,7 @@ func CmdDomainDelete(opts *Options) *cobra.Command {
 				}
 			}
 
-			_, err = opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Domains.DeleteDomain(
+			_, err = opts.createClient(cfg.BaseURL, cfg.AccessToken).Domains.DeleteDomain(
 				context.Background(),
 				cfg.Account,
 				domain)
@@ -168,7 +168,7 @@ func CmdDomainDelete(opts *Options) *cobra.Command {
 
 func CmdDomainCreate(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
-		Use:   "create",
+		Use:   actionCreate,
 		Short: "Create a domain",
 		Example: heredoc.Doc(`
 			dnsimple domain create --domain example.com
@@ -201,7 +201,7 @@ func CmdDomainCreate(opts *Options) *cobra.Command {
 				}
 			}
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			resp, err := apiClient.Domains.CreateDomain(
 				context.Background(),
@@ -240,17 +240,17 @@ func CmdDomainGet(opts *Options) *cobra.Command {
 				return err
 			}
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 			resp, err := apiClient.Domains.GetDomain(
 				context.Background(),
 				cfg.Account,
-				viper.GetString("domain"),
+				viper.GetString(configDomain),
 			)
 			if err != nil {
 				return err
 			}
 
-			output := viper.GetString("output")
+			output := viper.GetString(flagOutput)
 			if output != formatText && output != formatJSON && output != formatYAML {
 				return errors.New("invalid output format")
 			}
@@ -258,7 +258,7 @@ func CmdDomainGet(opts *Options) *cobra.Command {
 			formattedOutput, err := format.Format(format.DomainItem(*resp), &format.Options{
 				Format: format.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
-				Query: viper.GetString("query"),
+				Query: viper.GetString(flagQuery),
 			})
 			if err != nil {
 				return err
@@ -279,14 +279,14 @@ func CmdDomainGet(opts *Options) *cobra.Command {
 }
 
 func addDomainFlag(cmd *cobra.Command) {
-	cmd.Flags().String("domain", "", "Domain flags")
+	cmd.Flags().String(configDomain, "", "Domain flags")
 	if err := cmd.MarkFlagRequired("domain"); err != nil {
 		panic(err)
 	}
 }
 
 func addConfirmFlag(cmd *cobra.Command) {
-	cmd.Flags().Bool("confirm", false, "Confirm")
+	cmd.Flags().Bool(configConfirm, false, "Confirm")
 }
 
 func runPromptDomainName() (string, error) {
@@ -304,18 +304,18 @@ func runPromptDomainName() (string, error) {
 }
 
 func addPaginationFlags(cmd *cobra.Command) {
-	cmd.Flags().Int("page", 0, "Page")
-	cmd.Flags().Int("per-page", 0, "Per page")
+	cmd.Flags().Int(optPage, 0, "Page")
+	cmd.Flags().Int(optPerPage, 0, "Per page")
 }
 
 func getListOptions() dnsimple.ListOptions {
 	var opts dnsimple.ListOptions
 
-	if page := viper.GetInt("page"); page != 0 {
+	if page := viper.GetInt(optPage); page != 0 {
 		opts.Page = &page
 	}
 
-	if perPage := viper.GetInt("per-page"); perPage != 0 {
+	if perPage := viper.GetInt(optPerPage); perPage != 0 {
 		opts.PerPage = &perPage
 	}
 

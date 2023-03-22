@@ -31,16 +31,16 @@ func CmdDomainDNSSec(opts *Options) *cobra.Command {
 		Args:  cobra.NoArgs,
 	}, opts)
 
-	cmd.AddCommand(CmdDNSSECStatus(opts))
-	cmd.AddCommand(CmdDNSSECDisable(opts))
-	cmd.AddCommand(CmdDNSSECEnable(opts))
+	cmd.AddCommand(CmdDnssecStatus(opts))
+	cmd.AddCommand(CmdDnssecDisable(opts))
+	cmd.AddCommand(CmdDnssecEnable(opts))
 
 	addDomainRequiredFlag(cmd)
 
 	return cmd
 }
 
-func CmdDNSSECStatus(opts *Options) *cobra.Command {
+func CmdDnssecStatus(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
 		Use:   "status",
 		Short: "Retrieve DNSSEC status",
@@ -56,9 +56,9 @@ func CmdDNSSECStatus(opts *Options) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString("domain")
+			domain := viper.GetString(configDomain)
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			resp, err := apiClient.Domains.GetDnssec(
 				context.Background(),
@@ -83,7 +83,7 @@ func CmdDNSSECStatus(opts *Options) *cobra.Command {
 	return cmd
 }
 
-func CmdDNSSECDisable(opts *Options) *cobra.Command {
+func CmdDnssecDisable(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
 		Use:   "disable",
 		Short: "Disable DNSSEC",
@@ -99,9 +99,9 @@ func CmdDNSSECDisable(opts *Options) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString("domain")
+			domain := viper.GetString(configDomain)
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			_, err = apiClient.Domains.DisableDnssec(
 				context.Background(),
@@ -121,7 +121,7 @@ func CmdDNSSECDisable(opts *Options) *cobra.Command {
 	return cmd
 }
 
-func CmdDNSSECEnable(opts *Options) *cobra.Command {
+func CmdDnssecEnable(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
 		Use:   "enable",
 		Short: "Enable DNSSEC",
@@ -137,9 +137,9 @@ func CmdDNSSECEnable(opts *Options) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString("domain")
+			domain := viper.GetString(configDomain)
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			_, err = apiClient.Domains.EnableDnssec(
 				context.Background(),
