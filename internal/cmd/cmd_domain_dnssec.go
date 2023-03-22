@@ -46,8 +46,6 @@ func CmdDNSSECStatus(opts *Options) *cobra.Command {
 		Short: "Retrieve DNSSEC status",
 		Args:  cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			applyOpts(cmd, opts)
-
 			if err := viper.BindPFlags(cmd.Flags()); err != nil {
 				panic(err)
 			}
@@ -96,8 +94,6 @@ func CmdDNSSECDisable(opts *Options) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			applyOpts(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
@@ -136,8 +132,6 @@ func CmdDNSSECEnable(opts *Options) *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			applyOpts(cmd, opts)
-
 			cfg, err := config.New()
 			if err != nil {
 				return err
