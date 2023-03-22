@@ -32,19 +32,26 @@ func CmdWhoami(opts *Options) *cobra.Command {
 		Use:   "whoami",
 		Short: "Check identity",
 		Args:  cobra.NoArgs,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if err := viper.BindPFlags(cmd.Flags()); err != nil {
+				panic(err)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.New()
 			if err != nil {
 				return err
 			}
 
-			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Identity.Whoami(context.Background())
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
+
+			resp, err := apiClient.Identity.Whoami(context.Background())
 			if err != nil {
 				return err
 			}
 
 			output := viper.GetString(flagOutput)
-			if output != "text" && output != "json" && output != "yaml" {
+			if output != formatText && output != formatJSON && output != formatYAML {
 				return errors.New("invalid output format")
 			}
 
@@ -67,10 +74,6 @@ func CmdWhoami(opts *Options) *cobra.Command {
 
 	addOutputFlag(cmd, formatText)
 	addQueryFlag(cmd)
-
-	if err := viper.BindPFlags(cmd.Flags()); err != nil {
-		panic(err)
-	}
 
 	return cmd
 }

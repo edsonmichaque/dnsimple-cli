@@ -32,6 +32,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	actionList   = "list"
+	actionCreate = "create"
+	actionDelete = "delete"
+)
+
 func CmdDomainDSR(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
 		Use:   "dsr",
@@ -50,7 +56,7 @@ func CmdDomainDSR(opts *Options) *cobra.Command {
 
 func CmdDomainDSRCreate(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
-		Use:   "create",
+		Use:   actionCreate,
 		Short: "Create a delegation signer record",
 		Args:  cobra.MaximumNArgs(1),
 		Example: heredoc.Doc(`
@@ -69,8 +75,8 @@ func CmdDomainDSRCreate(opts *Options) *cobra.Command {
 			}
 
 			var (
-				domain   = viper.GetString(flagDomain)
-				fromFile = viper.GetString(flagFromFile)
+				domain   = viper.GetString(configDomain)
+				fromFile = viper.GetString(optionFromFile)
 			)
 
 			var rawBody []byte
@@ -106,7 +112,7 @@ func CmdDomainDSRCreate(opts *Options) *cobra.Command {
 				return err
 			}
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			resp, err := apiClient.Domains.CreateDelegationSignerRecord(
 				context.Background(),
@@ -131,7 +137,7 @@ func CmdDomainDSRCreate(opts *Options) *cobra.Command {
 
 func CmdDomainDSRList(opts *Options) *cobra.Command {
 	cmd := createCmd(&cobra.Command{
-		Use:   "list",
+		Use:   actionList,
 		Short: "List delegation signer records",
 		Args:  cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -145,16 +151,16 @@ func CmdDomainDSRList(opts *Options) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString(flagDomain)
+			domain := viper.GetString(configDomain)
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			resp, err := apiClient.Domains.ListDelegationSignerRecords(context.Background(), cfg.Account, domain, getListOptionsP())
 			if err != nil {
 				return err
 			}
 
-			output := viper.GetString("output")
+			output := viper.GetString(flagOutput)
 			if output != formatTable && output != formatJSON && output != formatYAML {
 				return errors.New("invalid output format")
 			}
@@ -203,18 +209,18 @@ func CmdDomainDSRGet(opts *Options) *cobra.Command {
 				return err
 			}
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 			resp, err := apiClient.Domains.GetDelegationSignerRecord(
 				context.Background(),
 				cfg.Account,
-				viper.GetString(flagDomain),
+				viper.GetString(configDomain),
 				viper.GetInt64(flagRecordID),
 			)
 			if err != nil {
 				return err
 			}
 
-			output := viper.GetString("output")
+			output := viper.GetString(flagOutput)
 			if output != formatText && output != formatJSON && output != formatYAML {
 				return errors.New("invalid output format")
 			}

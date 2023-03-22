@@ -74,8 +74,8 @@ func CmdCollaboratorAdd(opts *Options) *cobra.Command {
 			}
 
 			var (
-				domain   = viper.GetString(flagDomain)
-				fromFile = viper.GetString(flagFromFile)
+				domain   = viper.GetString(configDomain)
+				fromFile = viper.GetString(optionFromFile)
 			)
 
 			var rawBody []byte
@@ -111,7 +111,7 @@ func CmdCollaboratorAdd(opts *Options) *cobra.Command {
 				return err
 			}
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			resp, err := apiClient.Domains.AddCollaborator(
 				context.Background(),
@@ -153,21 +153,21 @@ func CmdCollaboratorRemove(opts *Options) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString(flagDomain)
+			domain := viper.GetString(configDomain)
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			_, err = apiClient.Domains.RemoveCollaborator(
 				context.Background(),
 				cfg.Account,
 				domain,
-				viper.GetInt64(flagCollaboratorID),
+				viper.GetInt64(configCollaboratorID),
 			)
 			if err != nil {
 				return err
 			}
 
-			cmd.Printf("✓ Deleted collaborator %v", viper.GetInt64(flagCollaboratorID))
+			cmd.Printf("✓ Deleted collaborator %v", viper.GetInt64(configCollaboratorID))
 
 			return nil
 		},
@@ -180,8 +180,8 @@ func CmdCollaboratorRemove(opts *Options) *cobra.Command {
 }
 
 func addCollaboratorIDFlag(cmd *cobra.Command) {
-	cmd.Flags().Int64("collaborator-id", 0, "Collaborator id")
-	if err := cmd.MarkFlagRequired("collaborator-id"); err != nil {
+	cmd.Flags().Int64(configCollaboratorID, 0, "Collaborator id")
+	if err := cmd.MarkFlagRequired(configCollaboratorID); err != nil {
 		panic(err)
 	}
 }
@@ -220,9 +220,9 @@ func CmdCollaboratorList(opts *Options) *cobra.Command {
 				return err
 			}
 
-			domain := viper.GetString(flagDomain)
+			domain := viper.GetString(configDomain)
 
-			apiClient := opts.BuildClient(cfg.BaseURL, cfg.AccessToken)
+			apiClient := opts.createClient(cfg.BaseURL, cfg.AccessToken)
 
 			resp, err := apiClient.Domains.ListCollaborators(context.Background(), cfg.Account, domain, nil)
 			if err != nil {
@@ -259,12 +259,12 @@ func CmdCollaboratorList(opts *Options) *cobra.Command {
 }
 
 func addDomainRequiredFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().String(flagDomain, "", "Domain name")
-	if err := cmd.MarkPersistentFlagRequired(flagDomain); err != nil {
+	cmd.PersistentFlags().String(configDomain, "", "Domain name")
+	if err := cmd.MarkPersistentFlagRequired(configDomain); err != nil {
 		panic(err)
 	}
 }
 
 func addFromFileFlag(cmd *cobra.Command) {
-	cmd.Flags().StringP(flagFromFile, "f", "", "Create from file")
+	cmd.Flags().StringP(optionFromFile, "f", "", "Create from file")
 }

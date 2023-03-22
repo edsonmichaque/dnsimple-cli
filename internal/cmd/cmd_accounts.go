@@ -50,14 +50,14 @@ func CmdAccounts(opts *Options) *cobra.Command {
 				return err
 			}
 
-			resp, err := opts.BuildClient(cfg.BaseURL, cfg.AccessToken).Accounts.ListAccounts(context.Background(), nil)
+			resp, err := opts.createClient(cfg.BaseURL, cfg.AccessToken).Accounts.ListAccounts(context.Background(), nil)
 			if err != nil {
 				// TODO: pretty print error returned from the API client
 				return err
 			}
 
 			output := viper.GetString(flagOutput)
-			if output != "table" && output != "json" && output != "yaml" {
+			if output != formatTable && output != formatJSON && output != formatYAML {
 				return errors.New("invalid output format")
 			}
 
@@ -78,7 +78,7 @@ func CmdAccounts(opts *Options) *cobra.Command {
 		},
 	}, opts)
 
-	addOutputFlag(cmd, "table")
+	addOutputFlag(cmd, formatTable)
 	addQueryFlag(cmd)
 
 	return cmd

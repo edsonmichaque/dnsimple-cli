@@ -44,11 +44,11 @@ var (
 		configAccount:     {},
 		configBaseURL:     {},
 		configAccessToken: {},
-		configSandbox:     {},
+		flagSandbox:       {},
 	}
 
 	validateConfig = map[string]func(string) (interface{}, error){
-		configSandbox: func(value string) (interface{}, error) {
+		flagSandbox: func(value string) (interface{}, error) {
 			return strconv.ParseBool(value)
 		},
 		configAccount: func(value string) (interface{}, error) {
@@ -88,10 +88,10 @@ func CmdConfig(opts *Options) *cobra.Command {
 			}
 
 			v := viper.New()
-			v.Set(flagAccount, cfg.Account)
-			v.Set(flagAccessToken, cfg.AccessToken)
+			v.Set(configAccount, cfg.Account)
+			v.Set(configAccessToken, cfg.AccessToken)
 			if cfg.BaseURL != "" {
-				v.Set(flagBaseURL, cfg.BaseURL)
+				v.Set(configBaseURL, cfg.BaseURL)
 			}
 
 			if cfg.Sandbox {
