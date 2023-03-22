@@ -32,6 +32,11 @@ var (
 )
 
 const (
+	envDNSimpleConfigFile   = "DNSIMPLE_CONFIG_FILE"
+	envXDGConfigHome        = "XDG_CONFIG_HOME"
+	envDNSimpleProfile      = "DNSIMPLE_PROFILE"
+	pathConfigFile          = "/etc/dnsimple"
+	pathDNSimple            = "dnsimple"
 	formatJSON              = "json"
 	formatYAML              = "yaml"
 	formatTable             = "table"
@@ -45,6 +50,11 @@ const (
 	envPrefix               = "DNSIMPLE"
 	defaultProfile          = "default"
 	defaultConfigFileFormat = "yaml"
+	flagDomain              = "domain"
+	flagFromFile            = "from-file"
+	flagCollaboratorID      = "collaborator-id"
+	flagOutput              = "output"
+	flagQuery               = "query"
 )
 
 func NewCmdRoot(opts *internal.CmdOpts) *cobra.Command {
@@ -59,14 +69,14 @@ func NewCmdRoot(opts *internal.CmdOpts) *cobra.Command {
 	cmd.AddCommand(NewCmdDomain(opts))
 	cmd.AddCommand(NewCmdVersion(opts))
 
-	cobra.OnInitialize(lookupConfigFiles)
+	cobra.OnInitialize(initConfig)
 
 	cmd.PersistentFlags().String(flagAccount, "", "Account")
 	cmd.PersistentFlags().String(flagBaseURL, "", "Base URL")
 	cmd.PersistentFlags().String(flagAccessToken, "", "Access token")
 	cmd.PersistentFlags().Bool(flagSandbox, false, "Sandbox environment")
 	cmd.PersistentFlags().StringVarP(&configFile, flagConfigFile, "c", "", "Configuration file")
-	cmd.PersistentFlags().StringVar(&profile, flagProfile, "default", "Profile")
+	cmd.PersistentFlags().StringVar(&profile, flagProfile, defaultProfile, "Profile")
 
 	cmd.MarkFlagsMutuallyExclusive(flagBaseURL, flagSandbox)
 
@@ -78,16 +88,8 @@ func NewCmdRoot(opts *internal.CmdOpts) *cobra.Command {
 	return cmd
 }
 
-func lookupConfigFiles() {
+func initConfig() {
 	var err error
-
-	const (
-		envDNSimpleConfigFile = "DNSIMPLE_CONFIG_FILE"
-		envXDGConfigHome      = "XDG_CONFIG_HOME"
-		envDNSimpleProfile    = "DNSIMPLE_PROFILE"
-		pathConfigFile        = "/etc/dnsimple"
-		pathDNSimple          = "dnsimple"
-	)
 
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
