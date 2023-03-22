@@ -22,7 +22,7 @@ import (
 	"io"
 
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
-	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
+	"github.com/edsonmichaque/dnsimple-cli/internal/format"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -50,8 +50,8 @@ func CmdWhoami(opts *Options) *cobra.Command {
 				return errors.New("invalid output format")
 			}
 
-			formattedOutput, err := formatter.Format(formatter.Whoami(*resp), &formatter.Options{
-				Format: formatter.OutputFormat(output),
+			formattedOutput, err := format.Format(format.Whoami(*resp), &format.Options{
+				Format: format.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: v.GetString(flagQuery),
 			})

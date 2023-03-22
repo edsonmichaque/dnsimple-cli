@@ -28,7 +28,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/dnsimple/dnsimple-go/dnsimple"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
-	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
+	"github.com/edsonmichaque/dnsimple-cli/internal/format"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -234,8 +234,8 @@ func CmdCollaboratorList(opts *Options) *cobra.Command {
 				return errors.New("invalid output format")
 			}
 
-			reader, err := formatter.Format(formatter.CollaboratorList(*resp), &formatter.Options{
-				Format: formatter.OutputFormat(output),
+			reader, err := format.Format(format.CollaboratorList(*resp), &format.Options{
+				Format: format.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: viper.GetString(flagQuery),
 			})
