@@ -119,8 +119,8 @@ func initConfig() {
 
 		viper.SetConfigName(defaultProfile)
 
-		if profile := os.Getenv(envDNSimpleProfile); profile != "" {
-			viper.SetConfigName(profile)
+		if profileEnv := os.Getenv(envDNSimpleProfile); profileEnv != "" {
+			viper.SetConfigName(profileEnv)
 		}
 
 		if profile != "" {
