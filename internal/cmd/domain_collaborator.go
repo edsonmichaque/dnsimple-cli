@@ -34,14 +34,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	flagDomain         = "domain"
-	flagFromFile       = "from-file"
-	flagCollaboratorID = "collaborator-id"
-	flagOutput         = "output"
-	flagQuery          = "query"
-)
-
 func NewCmdDomainCollaborator(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "collaborator",
@@ -253,19 +245,19 @@ func NewCmdCollaboratorList(opts *internal.CmdOpts) *cobra.Command {
 	}
 
 	addQueryFlag(cmd)
-	addOutputFlag(cmd, "table")
+	addOutputFlag(cmd, formatTable)
 	addPaginationFlags(cmd)
 
 	return cmd
 }
 
 func addDomainRequiredFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().String("domain", "", "Domain name")
-	if err := cmd.MarkPersistentFlagRequired("domain"); err != nil {
+	cmd.PersistentFlags().String(flagDomain, "", "Domain name")
+	if err := cmd.MarkPersistentFlagRequired(flagDomain); err != nil {
 		panic(err)
 	}
 }
 
 func addFromFileFlag(cmd *cobra.Command) {
-	cmd.Flags().StringP("from-file", "f", "", "Create from file")
+	cmd.Flags().StringP(flagFromFile, "f", "", "Create from file")
 }

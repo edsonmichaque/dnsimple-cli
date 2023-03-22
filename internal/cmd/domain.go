@@ -107,7 +107,7 @@ func NewCmdDomainList(opts *internal.CmdOpts) *cobra.Command {
 
 	addPaginationFlags(cmd)
 	addQueryFlag(cmd)
-	addOutputFlag(cmd, "table")
+	addOutputFlag(cmd, formatTable)
 
 	return cmd
 }
@@ -282,7 +282,7 @@ func NewCmdDomainGet(opts *internal.CmdOpts) *cobra.Command {
 	}
 
 	addQueryFlag(cmd)
-	addOutputFlag(cmd, "text")
+	addOutputFlag(cmd, formatText)
 
 	return cmd
 }
