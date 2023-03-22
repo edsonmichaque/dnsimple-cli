@@ -34,7 +34,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainCollaborator(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "collaborator",
 		Args: cobra.NoArgs,
@@ -53,7 +53,7 @@ func NewCmdDomainCollaborator(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdCollaboratorAdd(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add --domain [DOMAIN]",
 		Short: "Add collaborator",
@@ -137,7 +137,7 @@ func NewCmdCollaboratorAdd(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdCollaboratorRemove(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdCollaboratorRemove(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove --domain [DOMAIN]",
 		Short: "Remove collaborator",
@@ -191,7 +191,7 @@ func addCollaboratorIDFlag(cmd *cobra.Command) {
 	}
 }
 
-func NewCmdCollaboratorList(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdCollaboratorList(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "list --domain [DOMAIN]",
 		Example: heredoc.Doc(`

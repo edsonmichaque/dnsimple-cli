@@ -33,7 +33,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdDomainDSR(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDSR(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "dsr",
 		Short: "Manage domain signed records",
@@ -49,7 +49,7 @@ func NewCmdDomainDSR(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDSRCreate(opts *internal.CmdOpts) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
@@ -134,7 +134,7 @@ func NewCmdDomainDSRCreate(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainDSRList(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDSRList(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List delegation signer records",
@@ -190,7 +190,7 @@ func NewCmdDomainDSRList(opts *internal.CommandOptions) *cobra.Command {
 	return cmd
 }
 
-func NewCmdDomainDSRGet(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdDomainDSRGet(opts *internal.CmdOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a delegation signer record",

@@ -29,7 +29,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdAccounts(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdAccounts(opts *internal.CmdOpts) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{

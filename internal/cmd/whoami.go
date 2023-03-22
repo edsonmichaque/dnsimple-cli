@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCmdWhoami(opts *internal.CommandOptions) *cobra.Command {
+func NewCmdWhoami(opts *internal.CmdOpts) *cobra.Command {
 	v := viper.New()
 
 	cmd := &cobra.Command{
