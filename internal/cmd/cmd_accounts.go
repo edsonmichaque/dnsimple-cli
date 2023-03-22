@@ -23,7 +23,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
-	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
+	"github.com/edsonmichaque/dnsimple-cli/internal/format"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -58,8 +58,8 @@ func CmdAccounts(opts *Options) *cobra.Command {
 				return errors.New("invalid output format")
 			}
 
-			formattedOutput, err := formatter.Format(formatter.AccountList(*resp), &formatter.Options{
-				Format: formatter.OutputFormat(output),
+			formattedOutput, err := format.Format(format.AccountList(*resp), &format.Options{
+				Format: format.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: v.GetString(flagQuery),
 			})
@@ -85,8 +85,8 @@ func CmdAccounts(opts *Options) *cobra.Command {
 	return cmd
 }
 
-func addOutputFlag(cmd *cobra.Command, format string) {
-	cmd.Flags().StringP(flagOutput, "o", format, "Output format")
+func addOutputFlag(cmd *cobra.Command, f string) {
+	cmd.Flags().StringP(flagOutput, "o", f, "Output format")
 }
 
 func addQueryFlag(cmd *cobra.Command) {

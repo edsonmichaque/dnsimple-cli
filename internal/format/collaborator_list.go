@@ -14,7 +14,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package formatter
+package format
 
 import (
 	"encoding/json"
@@ -24,66 +24,56 @@ import (
 	"github.com/dnsimple/dnsimple-go/dnsimple"
 )
 
-type DSRList dnsimple.DelegationSignerRecordsResponse
+type CollaboratorList dnsimple.CollaboratorsResponse
 
-func (a DSRList) FormatJSON(opts *Options) (io.Reader, error) {
+func (a CollaboratorList) FormatJSON(opts *Options) (io.Reader, error) {
 	return formatJSON(a, opts)
 }
 
-func (a DSRList) FormatYAML(opts *Options) (io.Reader, error) {
+func (a CollaboratorList) FormatYAML(opts *Options) (io.Reader, error) {
 	return formatYAML(a, opts)
 }
 
-func (a DSRList) FormatTable(_ *Options) (io.Reader, error) {
+func (a CollaboratorList) FormatTable(_ *Options) (io.Reader, error) {
 	return formatTable(a)
 }
 
-func (a DSRList) formatJSON(opts *Options) ([]byte, error) {
+func (a CollaboratorList) formatJSON(opts *Options) ([]byte, error) {
 	return json.MarshalIndent(a.Data, "", "  ")
 }
 
-func (a DSRList) formatHeader() []string {
+func (a CollaboratorList) formatHeader() []string {
 	return []string{
 		"ID",
 		"DOMAIN ID",
-		"ALGORITHM",
-		"DIGEST",
-		"DIGEST TYPE",
-		"KEYTAG",
-		"PUBLIC KEY",
+		"DOMAIN NAME",
+		"USER ID",
+		"USER EMAIL",
+		"INVITATION",
 		"CREATED AT",
 		"UPDATED AT",
+		"ACCEPTED AT",
 	}
 }
 
-func (a DSRList) formatRows() []map[string]string {
+func (a CollaboratorList) formatRows() []map[string]string {
 	data := make([]map[string]string, 0, len(a.Data))
 
-	dsr := a.Data
+	domains := a.Data
 
-	const txtLen = 10
-
-	for i := range dsr {
+	for i := range domains {
 		data = append(data, map[string]string{
-			"ID":          fmt.Sprintf("%d", dsr[i].ID),
-			"DOMAIN ID":   fmt.Sprintf("%d", dsr[i].DomainID),
-			"ALGORITHM":   dsr[i].Algorithm,
-			"DIGEST":      truncate(dsr[i].Digest, txtLen),
-			"DIGEST TYPE": dsr[i].DigestType,
-			"KEYTAG":      dsr[i].Keytag,
-			"PUBLIC KEY":  truncate(dsr[i].PublicKey, txtLen),
-			"CREATED AT":  dsr[i].CreatedAt,
-			"UPDATED AT":  dsr[i].UpdatedAt,
+			"ID":          fmt.Sprintf("%d", domains[i].ID),
+			"DOMAIN ID":   fmt.Sprintf("%d", domains[i].DomainID),
+			"DOMAIN NAME": domains[i].DomainName,
+			"USER ID":     fmt.Sprintf("%d", domains[i].UserID),
+			"USER EMAIL":  domains[i].UserEmail,
+			"INVITATION":  fmt.Sprintf("%t", domains[i].Invitation),
+			"CREATED AT":  domains[i].CreatedAt,
+			"UPDATED AT":  domains[i].UpdatedAt,
+			"ACCEPTED AT": domains[i].AcceptedAt,
 		})
 	}
 
 	return data
-}
-
-func truncate(s string, length int) string {
-	if len(s) <= length {
-		return s
-	}
-
-	return s[:length] + "..."
 }

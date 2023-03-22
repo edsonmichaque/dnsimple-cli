@@ -26,7 +26,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/dnsimple/dnsimple-go/dnsimple"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
-	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
+	"github.com/edsonmichaque/dnsimple-cli/internal/format"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -85,8 +85,8 @@ func CmdDomainList(opts *Options) *cobra.Command {
 				return errors.New("invalid output format" + output)
 			}
 
-			formattedOutput, err := formatter.Format(formatter.DomainList(*resp), &formatter.Options{
-				Format: formatter.OutputFormat(output),
+			formattedOutput, err := format.Format(format.DomainList(*resp), &format.Options{
+				Format: format.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: viper.GetString(flagQuery),
 			})
@@ -255,8 +255,8 @@ func CmdDomainGet(opts *Options) *cobra.Command {
 				return errors.New("invalid output format")
 			}
 
-			formattedOutput, err := formatter.Format(formatter.DomainItem(*resp), &formatter.Options{
-				Format: formatter.OutputFormat(output),
+			formattedOutput, err := format.Format(format.DomainItem(*resp), &format.Options{
+				Format: format.OutputFormat(output),
 				// TODO: query should be only used for JSON and YAML output formats
 				Query: viper.GetString("query"),
 			})

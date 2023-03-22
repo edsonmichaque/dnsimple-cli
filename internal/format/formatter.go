@@ -14,7 +14,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package formatter
+package format
 
 import (
 	"bytes"
@@ -61,38 +61,38 @@ type Text interface {
 
 func Format(data interface{}, opts *Options) (io.Reader, error) {
 	if opts.Format == OutputFormatJSON {
-		if formatter, ok := data.(JSON); ok {
-			return formatter.FormatJSON(opts)
+		if format, ok := data.(JSON); ok {
+			return format.FormatJSON(opts)
 		}
 
-		return nil, errors.New("json formatter is not implemented")
+		return nil, errors.New("json format is not implemented")
 	}
 
 	if opts.Format == OutputFormatYAML {
-		if formatter, ok := data.(YAML); ok {
-			return formatter.FormatYAML(opts)
+		if format, ok := data.(YAML); ok {
+			return format.FormatYAML(opts)
 		}
 
-		return nil, errors.New("yaml formatter is not implemented")
+		return nil, errors.New("yaml format is not implemented")
 	}
 
 	if opts.Format == OutputFormatTable {
-		if formatter, ok := data.(Table); ok {
-			return formatter.FormatTable(opts)
+		if format, ok := data.(Table); ok {
+			return format.FormatTable(opts)
 		}
 
-		return nil, errors.New("table formatter is not implemented")
+		return nil, errors.New("table format is not implemented")
 	}
 
 	if opts.Format == OutputFormatText {
-		if formatter, ok := data.(Text); ok {
-			return formatter.FormatText(opts)
+		if format, ok := data.(Text); ok {
+			return format.FormatText(opts)
 		}
 
-		return nil, errors.New("table formatter is not implemented")
+		return nil, errors.New("table format is not implemented")
 	}
 
-	return nil, errors.New("invalid formatter")
+	return nil, errors.New("invalid format")
 }
 
 func formatJSON(j jsonFormatter, opts *Options) (io.Reader, error) {
