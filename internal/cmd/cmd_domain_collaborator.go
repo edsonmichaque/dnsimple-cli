@@ -27,7 +27,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/dnsimple/dnsimple-go/dnsimple"
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
 	"github.com/spf13/cobra"
@@ -199,7 +198,6 @@ func applyOpts(cmd *cobra.Command, opts *Options) {
 	if opts.Stderr != nil {
 		cmd.SetErr(opts.Stderr)
 	}
-
 }
 
 func CmdCollaboratorList(opts *Options) *cobra.Command {

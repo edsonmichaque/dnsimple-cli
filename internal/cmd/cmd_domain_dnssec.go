@@ -19,7 +19,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

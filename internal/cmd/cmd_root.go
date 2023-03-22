@@ -21,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

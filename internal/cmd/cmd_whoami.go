@@ -21,7 +21,6 @@ import (
 	"errors"
 	"io"
 
-	"github.com/edsonmichaque/dnsimple-cli/internal"
 	"github.com/edsonmichaque/dnsimple-cli/internal/config"
 	"github.com/edsonmichaque/dnsimple-cli/internal/formatter"
 	"github.com/spf13/cobra"
